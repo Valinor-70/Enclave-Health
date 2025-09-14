@@ -1,4 +1,4 @@
-You are an automated developer. Build a Progressive Web App (PWA) called EnclaveFit: an offline-first workout and meal planner with spectacular Enclave-inspired UI. The app must run in Chrome as an installable PWA and be packaged as an Android APK (via TWA). Use exactly one user-supplied flag image (at ./assets/enclave_flag.png) for all icons, resized as required.
+You are an automated developer. Build a Progressive Web App (PWA) called EnclaveFit: an offline-first workout and meal planner with spectacular Enclave-inspired UI. The app must run in Chrome as an installable PWA and be packaged as an Android APK (via TWA). Use exactly one user-supplied flag image (at ./61lWnXjxMBL._UF894,1000_QL80_.jpg) for all icons, resized as required.
 
 
 ---
