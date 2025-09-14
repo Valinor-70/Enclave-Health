@@ -1,0 +1,217 @@
+You are an automated developer. Build a Progressive Web App (PWA) called EnclaveFit: an offline-first workout and meal planner with spectacular Enclave-inspired UI. The app must run in Chrome as an installable PWA and be packaged as an Android APK (via TWA). Use exactly one user-supplied flag image (at ./assets/enclave_flag.png) for all icons, resized as required.
+
+
+---
+
+📁 Project structure
+
+/offline
+  /public
+    index.html
+    manifest.json
+    service-worker.js
+    /icons
+      enclave-flag-192.png
+      enclave-flag-512.png
+      enclave-flag-adaptive-foreground.png
+      enclave-flag-adaptive-background.png
+  /src
+    App.tsx
+    index.tsx
+    /components
+      Header.tsx
+      Dashboard.tsx
+      OnboardingWizard.tsx
+      WorkoutPlanner.tsx
+      MealPlanner.tsx
+      Graphs.tsx
+      OfflineStatusIndicator.tsx
+    /db
+      db.ts (IndexedDB schema with Dexie)
+    /logic
+      evaluation.ts (personalization model)
+  package.json
+  vite.config.ts
+  tsconfig.json
+  README.md
+
+/android
+  (Android TWA wrapper project — build.gradle, AndroidManifest.xml, etc.)
+
+
+---
+
+🔑 Core features
+
+1. Onboarding wizard
+
+Collects user details: name, weight, height, age, gender, fitness aim (lose fat, gain muscle, maintain), and key strength indicators (e.g., current bench press, squat, deadlift, overhead press).
+
+Stores profile in IndexedDB.
+
+Passes inputs to evaluation.ts (see below).
+
+
+
+2. Evaluation model (personalized training logic)
+
+Implement a realistic rules-based model in /offline/src/logic/evaluation.ts.
+
+Input: user profile (height, weight, aim, lifts).
+
+Output: recommended starting program tailored to goals:
+
+Strength focus → 3-day program with progressive overload.
+
+Hypertrophy → 4-day split with rep ranges 8–12.
+
+Fat loss → conditioning + strength circuits.
+
+
+Use formulas such as estimated 1RM from entered lifts (Epley formula).
+
+Calorie target estimate: TDEE = BMR × activity multiplier. Use Mifflin-St Jeor for BMR.
+
+Recommend macros based on aim:
+
+Cut: 40% protein, 30% carbs, 30% fat.
+
+Bulk: 25% protein, 50% carbs, 25% fat.
+
+Maintain: 30% protein, 40% carbs, 30% fat.
+
+
+
+
+3. Dashboard
+
+Shows today’s workout, meal macros, and a quick log area.
+
+Includes “Mark complete” buttons that persist offline.
+
+
+
+4. Workout Planner
+
+List of workouts with sets/reps.
+
+Ability to add/edit exercises.
+
+Use IndexedDB for persistence and sync queue for changes.
+
+
+
+5. Meal Planner
+
+Add meals and ingredients.
+
+Show calorie and macro breakdown.
+
+
+
+6. Graphs Tab (NEW)
+
+Accessible via bottom navigation.
+
+Displays progress over time:
+
+Weight trend (line graph).
+
+Strength progress (bar/line chart for bench/squat/deadlift).
+
+Calorie intake vs. target.
+
+
+Built using Recharts.
+
+Data pulled from IndexedDB history.
+
+
+
+7. Offline-first behavior
+
+Service worker caches shell and data.
+
+IndexedDB stores logs, workouts, meals, progress.
+
+Sync queue uploads changes when connection is restored.
+
+
+
+8. Android APK
+
+Provide /android/ project wrapping PWA via Bubblewrap TWA.
+
+Configure adaptive icons with the flag foreground + background color #0b0f14.
+
+
+
+
+
+---
+
+🎨 Enclave-inspired UI
+
+Colors:
+
+Background: #0b0f14
+
+Panels: #0f1720
+
+Primary glowing HUD: #00b4ff
+
+Accent: #ff8a00 (sparingly)
+
+
+Typography: Orbitron/Audiowide for headings, Inter/IBM Plex Sans for body.
+
+Effects: HUD overlays, scanline texture, glowing borders, beveled panels.
+
+Motion: subtle HUD flicker, smooth transitions via Framer Motion.
+
+Header: shows the flag icon and app title.
+
+Graphs tab: glowing gridlines, futuristic progress plots.
+
+
+
+---
+
+📊 Example Graphs Implementation
+
+Weight over time → Recharts <LineChart>.
+
+Strength tracking → grouped <BarChart> with squat, bench, deadlift.
+
+Calories → <AreaChart> showing intake vs. target band.
+
+
+
+---
+
+⚙️ Manifest
+
+/offline/public/manifest.json must include only two icons (192 and 512) derived from the flag, with "purpose": "any maskable".
+
+
+---
+
+✅ Acceptance criteria
+
+App installs as PWA in Chrome on Android.
+
+Only the provided flag image is used as runtime icons (resized to 192 and 512, plus adaptive versions).
+
+Onboarding evaluation produces personalized program and macros.
+
+Dashboard shows daily plan.
+
+Graphs tab shows history-based progress.
+
+Works offline: can add workout while offline, reopen, see it, then sync when online.
+
+Android APK builds in /android/ with TWA wrapper.
+
+UI is spectacular, Enclave-themed, and accessible.
+
+
