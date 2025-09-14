@@ -196,11 +196,11 @@ export const dbHelpers = {
 
   // Get progress entries for date range
   async getProgressEntries(userId: number, startDate: Date, endDate: Date): Promise<ProgressEntry[]> {
-    return await db.progressEntries
+    const entries = await db.progressEntries
       .where('userId').equals(userId)
       .and(entry => entry.date >= startDate && entry.date <= endDate)
-      .orderBy('date')
       .toArray();
+    return entries.sort((a, b) => a.date.getTime() - b.date.getTime());
   },
 
   // Get today's data

@@ -75,10 +75,6 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
 
       await db.userProfiles.add(profile);
       
-      // Generate personalized plan
-      const personalizedPlan = EvaluationModel.createPersonalizedPlan(profile);
-      
-      // Show success message briefly
       setTimeout(() => {
         onComplete(profile);
       }, 1000);

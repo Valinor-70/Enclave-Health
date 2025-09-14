@@ -134,7 +134,7 @@ export class EvaluationModel {
   // Generate personalized nutrition plan
   static generateNutritionPlan(profile: UserProfile): NutritionPlan {
     const tdee = this.calculateTDEE(profile);
-    const { fitnessAim, weight } = profile;
+    const { fitnessAim } = profile;
 
     let calories: number;
     let proteinPercent: number;
@@ -201,7 +201,7 @@ export class EvaluationModel {
   }
 
   // Program templates
-  private static getStrengthProgram(level: string): WorkoutProgram {
+  private static getStrengthProgram(_level: string): WorkoutProgram {
     const beginner: WorkoutDay[] = [
       {
         name: 'Day A',
@@ -234,7 +234,7 @@ export class EvaluationModel {
     };
   }
 
-  private static getHypertrophyProgram(level: string): WorkoutProgram {
+  private static getHypertrophyProgram(_level: string): WorkoutProgram {
     const hypertrophy: WorkoutDay[] = [
       {
         name: 'Upper Body A',
@@ -291,7 +291,7 @@ export class EvaluationModel {
     };
   }
 
-  private static getFatLossProgram(level: string): WorkoutProgram {
+  private static getFatLossProgram(_level: string): WorkoutProgram {
     const fatLoss: WorkoutDay[] = [
       {
         name: 'Full Body Circuit A',
