@@ -24,6 +24,23 @@ const App: React.FC = () => {
     initializeApp();
   }, []);
 
+  // Hide loading screen when app is ready
+  useEffect(() => {
+    if (!isLoading) {
+      const hideLoadingScreen = () => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+          }, 300);
+        }
+      };
+      // Small delay to ensure smooth transition
+      setTimeout(hideLoadingScreen, 50);
+    }
+  }, [isLoading]);
+
   const initializeApp = async () => {
     try {
       // Initialize database

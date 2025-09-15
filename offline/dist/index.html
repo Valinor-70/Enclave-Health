@@ -9,12 +9,16 @@
     
     <!-- PWA meta tags -->
     <link rel="apple-touch-icon" href="/icons/enclave-flag-192.png" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Local Font Fallbacks -->
+    <style>
+      /* Use system fonts as fallbacks for offline reliability */
+      :root {
+        --font-heading: 'Orbitron', 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-body: 'Inter', 'SF Pro Text', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+    </style>
     
     <title>EnclaveFit</title>
     
@@ -29,7 +33,7 @@
       body {
         background: #0b0f14;
         color: #ffffff;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', 'SF Pro Text', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         min-height: 100vh;
         overflow-x: hidden;
       }
@@ -81,7 +85,7 @@
         background: #0099cc;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-CHZuTXDI.js"></script>
+    <script type="module" crossorigin src="/assets/index-DIMNlw4E.js"></script>
   <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
   <body>
     <div id="loading-screen">
