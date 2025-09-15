@@ -1,0 +1,41 @@
+name: Build Vite React App
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: offline/package-lock.json
+
+      # Install dependencies inside offline/
+      - name: Install dependencies
+        working-directory: offline
+        run: npm install
+
+      # Build Vite app
+      - name: Build app
+        working-directory: offline
+        run: npm run build
+
+      # Upload built files as artifact
+      - name: Upload production-ready build
+        uses: actions/upload-artifact@v4
+        with:
+          name: vite-react-build
+          path: offline/dist
