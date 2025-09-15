@@ -9,6 +9,8 @@ interface WorkoutPlannerProps {
 
 const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number>(0);
+  const [workoutDays, setWorkoutDays] = useState<any[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
@@ -26,6 +28,9 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
         await createDefaultPlan();
       } else {
         setSelectedPlan(plans[0]);
+        // Load the actual workout program to get day structure
+        const personalizedPlan = EvaluationModel.createPersonalizedPlan(user);
+        setWorkoutDays(personalizedPlan.workoutProgram.workouts);
       }
     } catch (error) {
       console.error('Failed to load workout plans:', error);
@@ -38,6 +43,7 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
     try {
       const personalizedPlan = EvaluationModel.createPersonalizedPlan(user);
       const workoutProgram = personalizedPlan.workoutProgram;
+      setWorkoutDays(workoutProgram.workouts);
 
       // Convert to our database format
       const exercises: Exercise[] = workoutProgram.workouts[0]?.exercises.map((ex, index) => ({
@@ -67,6 +73,11 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
     } catch (error) {
       console.error('Failed to create default plan:', error);
     }
+  };
+
+  const getCurrentDayExercises = (): any[] => {
+    if (!workoutDays[selectedDay]) return [];
+    return workoutDays[selectedDay].exercises;
   };
 
   const addExercise = async (exercise: Exercise) => {
@@ -99,21 +110,6 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
       setEditingExercise(null);
     } catch (error) {
       console.error('Failed to update exercise:', error);
-    }
-  };
-
-  const deleteExercise = async (exerciseId: number) => {
-    if (!selectedPlan) return;
-
-    try {
-      const updatedExercises = selectedPlan.exercises.filter(ex => ex.id !== exerciseId);
-      const updatedPlan = { ...selectedPlan, exercises: updatedExercises, updatedAt: new Date() };
-
-      await db.workoutPlans.update(selectedPlan.id!, { exercises: updatedExercises, updatedAt: new Date() });
-      setSelectedPlan(updatedPlan);
-      
-    } catch (error) {
-      console.error('Failed to delete exercise:', error);
     }
   };
 
@@ -152,91 +148,150 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
               <p>{selectedPlan.description}</p>
               <div className="plan-meta">
                 <span className="frequency">{selectedPlan.frequency} days/week</span>
-                <span className="exercise-count">{selectedPlan.exercises.length} exercises</span>
+                <span className="exercise-count">{getCurrentDayExercises().length} exercises per day</span>
+                <span className="total-exercises">{workoutDays.reduce((total, day) => total + day.exercises.length, 0)} total exercises</span>
               </div>
             </div>
-            <button 
-              className="add-exercise-btn"
-              onClick={() => setIsCreating(true)}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-              </svg>
-              Add Exercise
-            </button>
           </div>
 
-          {/* Exercise List */}
-          <div className="exercise-list">
-            <AnimatePresence>
-              {selectedPlan.exercises.map((exercise, index) => (
-                <motion.div 
-                  key={exercise.id}
-                  className="exercise-card"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                >
-                  <div className="exercise-number">{index + 1}</div>
-                  
-                  <div className="exercise-content">
-                    <div className="exercise-header">
-                      <h3>{exercise.name}</h3>
-                      <div className="exercise-actions">
-                        <button 
-                          className="action-btn edit"
-                          onClick={() => setEditingExercise(exercise)}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                          </svg>
-                        </button>
-                        <button 
-                          className="action-btn delete"
-                          onClick={() => deleteExercise(exercise.id!)}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="exercise-details">
-                      <div className="detail-item">
-                        <span className="label">Sets:</span>
-                        <span className="value">{exercise.sets}</span>
-                      </div>
-                      <div className="detail-item">
-                        <span className="label">Reps:</span>
-                        <span className="value">{exercise.reps}</span>
-                      </div>
-                      <div className="detail-item">
-                        <span className="label">Weight:</span>
-                        <span className="value">{exercise.weight || 'BW'} kg</span>
-                      </div>
-                      <div className="detail-item">
-                        <span className="label">Rest:</span>
-                        <span className="value">{Math.floor(exercise.restTime / 60)}:{(exercise.restTime % 60).toString().padStart(2, '0')}</span>
-                      </div>
-                    </div>
-                    
-                    {exercise.notes && (
-                      <div className="exercise-notes">
-                        <strong>Notes:</strong> {exercise.notes}
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+          {/* Day Selector */}
+          <div className="day-selector">
+            {workoutDays.map((day, index) => (
+              <motion.button
+                key={index}
+                className={`day-tab ${selectedDay === index ? 'active' : ''}`}
+                onClick={() => setSelectedDay(index)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="day-number">Day {index + 1}</div>
+                <div className="day-name">{day.name}</div>
+                <div className="exercise-count">{day.exercises.length} exercises</div>
+              </motion.button>
+            ))}
           </div>
+
+          {/* Current Day Content */}
+          <motion.div 
+            key={selectedDay}
+            className="day-content"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="day-header">
+              <h3>{workoutDays[selectedDay]?.name}</h3>
+              <button 
+                className="add-exercise-btn"
+                onClick={() => setIsCreating(true)}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                Add Exercise
+              </button>
+            </div>
+
+            {/* Exercise List */}
+            <div className="exercise-list">
+              <AnimatePresence>
+                {getCurrentDayExercises().map((exercise: any, index: number) => (
+                  <motion.div 
+                    key={`${exercise.name}-${index}`}
+                    className="exercise-card enhanced"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    whileHover={{ scale: 1.01, y: -2 }}
+                  >
+                    <div className="exercise-number">{index + 1}</div>
+                    
+                    <div className="exercise-content">
+                      <div className="exercise-header">
+                        <h4>{exercise.name}</h4>
+                        <div className="exercise-actions">
+                          <button 
+                            className="action-btn edit"
+                            onClick={() => setEditingExercise({
+                              id: index,
+                              name: exercise.name,
+                              sets: exercise.sets,
+                              reps: exercise.reps,
+                              weight: exercise.weight || 0,
+                              restTime: exercise.restTime,
+                              notes: exercise.notes
+                            })}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="exercise-details">
+                        <div className="detail-grid">
+                          <div className="detail-item">
+                            <div className="detail-icon">🏋️</div>
+                            <div className="detail-content">
+                              <span className="label">Sets</span>
+                              <span className="value">{exercise.sets}</span>
+                            </div>
+                          </div>
+                          <div className="detail-item">
+                            <div className="detail-icon">🔄</div>
+                            <div className="detail-content">
+                              <span className="label">Reps</span>
+                              <span className="value">{exercise.reps}</span>
+                            </div>
+                          </div>
+                          <div className="detail-item">
+                            <div className="detail-icon">⚖️</div>
+                            <div className="detail-content">
+                              <span className="label">Weight</span>
+                              <span className="value">{exercise.weight ? `${exercise.weight}kg` : 'BW'}</span>
+                            </div>
+                          </div>
+                          <div className="detail-item">
+                            <div className="detail-icon">⏱️</div>
+                            <div className="detail-content">
+                              <span className="label">Rest</span>
+                              <span className="value">{Math.floor(exercise.restTime / 60)}:{(exercise.restTime % 60).toString().padStart(2, '0')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {exercise.notes && (
+                        <div className="exercise-notes">
+                          <div className="notes-header">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                            </svg>
+                            <strong>Notes:</strong>
+                          </div>
+                          <p>{exercise.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </motion.div>
         </motion.div>
       ) : (
         <div className="no-plans">
-          <p>No workout plans found</p>
-          <button onClick={createDefaultPlan}>Create Default Plan</button>
+          <div className="no-plans-icon">🏋️‍♂️</div>
+          <h3>No workout plans found</h3>
+          <p>Let's create your personalized training protocol</p>
+          <button onClick={createDefaultPlan} className="create-plan-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Create Training Plan
+          </button>
         </div>
       )}
 
@@ -283,7 +338,7 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
 
       <style>{`
         .workout-planner {
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto;
           padding: 0 20px;
         }
@@ -310,115 +365,280 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
         .header-section {
           text-align: center;
           margin-bottom: 32px;
+          position: relative;
+        }
+
+        .header-section::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100px;
+          height: 100px;
+          background: radial-gradient(circle, rgba(0, 180, 255, 0.2) 0%, transparent 70%);
+          border-radius: 50%;
+          z-index: -1;
         }
 
         .header-section h1 {
           font-family: 'Orbitron', monospace;
-          font-size: 36px;
+          font-size: 42px;
           color: #00b4ff;
           margin: 0 0 8px 0;
-          text-shadow: 0 0 20px rgba(0, 180, 255, 0.5);
+          text-shadow: 0 0 30px rgba(0, 180, 255, 0.6);
+          letter-spacing: 2px;
         }
 
         .header-section p {
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 16px;
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 18px;
           margin: 0;
+          font-weight: 300;
         }
 
         .plan-header {
-          background: rgba(15, 23, 32, 0.8);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 16px;
-          padding: 24px;
-          margin-bottom: 24px;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          backdrop-filter: blur(10px);
+          background: linear-gradient(135deg, rgba(15, 23, 32, 0.9), rgba(11, 15, 20, 0.9));
+          border: 2px solid rgba(0, 180, 255, 0.3);
+          border-radius: 20px;
+          padding: 32px;
+          margin-bottom: 32px;
+          backdrop-filter: blur(20px);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .plan-header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #00b4ff, #ff8a00, transparent);
+          animation: scanline 3s linear infinite;
         }
 
         .plan-info h2 {
           font-family: 'Orbitron', monospace;
           color: #00b4ff;
-          font-size: 24px;
-          margin: 0 0 8px 0;
+          font-size: 28px;
+          margin: 0 0 12px 0;
+          text-shadow: 0 0 15px rgba(0, 180, 255, 0.4);
         }
 
         .plan-info p {
-          color: rgba(255, 255, 255, 0.8);
-          margin: 0 0 12px 0;
+          color: rgba(255, 255, 255, 0.9);
+          margin: 0 0 20px 0;
+          font-size: 16px;
         }
 
         .plan-meta {
           display: flex;
           gap: 16px;
+          flex-wrap: wrap;
         }
 
         .plan-meta span {
-          background: rgba(0, 180, 255, 0.1);
+          background: linear-gradient(135deg, rgba(0, 180, 255, 0.2), rgba(255, 138, 0, 0.1));
           color: #00b4ff;
-          padding: 4px 8px;
-          border-radius: 6px;
-          font-size: 12px;
+          padding: 8px 16px;
+          border-radius: 12px;
+          font-size: 13px;
           font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
+          border: 1px solid rgba(0, 180, 255, 0.3);
+          backdrop-filter: blur(10px);
+        }
+
+        .day-selector {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 20px;
+          margin-bottom: 32px;
+        }
+
+        .day-tab {
+          background: linear-gradient(135deg, rgba(15, 23, 32, 0.8), rgba(11, 15, 20, 0.8));
+          border: 2px solid rgba(0, 180, 255, 0.2);
+          border-radius: 16px;
+          padding: 20px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .day-tab::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.1), transparent);
+          transition: left 0.5s ease;
+        }
+
+        .day-tab:hover::before {
+          left: 100%;
+        }
+
+        .day-tab:hover {
+          border-color: #00b4ff;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 30px rgba(0, 180, 255, 0.3);
+        }
+
+        .day-tab.active {
+          border-color: #00b4ff;
+          background: linear-gradient(135deg, rgba(0, 180, 255, 0.15), rgba(255, 138, 0, 0.05));
+          box-shadow: 0 5px 25px rgba(0, 180, 255, 0.4);
+        }
+
+        .day-number {
+          font-family: 'Orbitron', monospace;
+          font-size: 14px;
+          color: #ff8a00;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 8px;
+        }
+
+        .day-name {
+          font-size: 18px;
+          font-weight: 600;
+          color: #ffffff;
+          margin-bottom: 8px;
+          line-height: 1.3;
+        }
+
+        .day-tab .exercise-count {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+          background: none;
+          padding: 0;
+          border-radius: 0;
+          border: none;
+        }
+
+        .day-content {
+          background: linear-gradient(135deg, rgba(15, 23, 32, 0.6), rgba(11, 15, 20, 0.6));
+          border-radius: 20px;
+          padding: 24px;
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 180, 255, 0.2);
+        }
+
+        .day-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+        }
+
+        .day-header h3 {
+          font-family: 'Orbitron', monospace;
+          color: #00b4ff;
+          font-size: 24px;
+          margin: 0;
+          text-shadow: 0 0 15px rgba(0, 180, 255, 0.4);
         }
 
         .add-exercise-btn {
           background: linear-gradient(135deg, #00b4ff, #0099cc);
           color: #ffffff;
           border: none;
-          border-radius: 8px;
-          padding: 12px 20px;
+          border-radius: 12px;
+          padding: 14px 24px;
           font-weight: 600;
           cursor: pointer;
           display: flex;
           align-items: center;
           gap: 8px;
           transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .add-exercise-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.4s ease;
+        }
+
+        .add-exercise-btn:hover::before {
+          left: 100%;
         }
 
         .add-exercise-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 5px 20px rgba(0, 180, 255, 0.4);
+          box-shadow: 0 8px 25px rgba(0, 180, 255, 0.5);
         }
 
         .exercise-list {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 20px;
         }
 
         .exercise-card {
-          background: rgba(15, 23, 32, 0.8);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 12px;
-          padding: 20px;
+          background: linear-gradient(135deg, rgba(15, 23, 32, 0.9), rgba(11, 15, 20, 0.9));
+          border: 2px solid rgba(0, 180, 255, 0.2);
+          border-radius: 16px;
+          padding: 24px;
           display: flex;
-          gap: 16px;
-          backdrop-filter: blur(10px);
+          gap: 20px;
+          backdrop-filter: blur(20px);
           transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
         }
 
-        .exercise-card:hover {
+        .exercise-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.6), transparent);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .exercise-card.enhanced:hover {
           border-color: #00b4ff;
-          box-shadow: 0 0 20px rgba(0, 180, 255, 0.2);
+          box-shadow: 0 8px 30px rgba(0, 180, 255, 0.3);
+        }
+
+        .exercise-card.enhanced:hover::before {
+          opacity: 1;
         }
 
         .exercise-number {
-          width: 40px;
-          height: 40px;
+          width: 50px;
+          height: 50px;
           background: linear-gradient(135deg, #00b4ff, #0099cc);
           color: #ffffff;
-          border-radius: 8px;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 700;
-          font-size: 16px;
+          font-size: 18px;
           flex-shrink: 0;
+          font-family: 'Orbitron', monospace;
+          box-shadow: 0 4px 15px rgba(0, 180, 255, 0.3);
         }
 
         .exercise-content {
@@ -429,14 +649,15 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 12px;
+          margin-bottom: 16px;
         }
 
-        .exercise-header h3 {
+        .exercise-header h4 {
           color: #ffffff;
-          font-size: 18px;
+          font-size: 20px;
           margin: 0;
           font-weight: 600;
+          line-height: 1.3;
         }
 
         .exercise-actions {
@@ -447,8 +668,8 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
         .action-btn {
           background: rgba(255, 255, 255, 0.1);
           border: 1px solid rgba(255, 255, 255, 0.3);
-          border-radius: 6px;
-          padding: 6px 8px;
+          border-radius: 8px;
+          padding: 8px 10px;
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
@@ -463,6 +684,7 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
         .action-btn.edit:hover {
           background: rgba(0, 180, 255, 0.2);
           border-color: #00b4ff;
+          transform: scale(1.1);
         }
 
         .action-btn.delete {
@@ -472,42 +694,76 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
         .action-btn.delete:hover {
           background: rgba(239, 68, 68, 0.2);
           border-color: #ef4444;
+          transform: scale(1.1);
         }
 
         .exercise-details {
+          margin-bottom: 16px;
+        }
+
+        .detail-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 16px;
-          margin-bottom: 12px;
+          gap: 20px;
         }
 
         .detail-item {
           display: flex;
-          flex-direction: column;
-          gap: 4px;
+          align-items: center;
+          gap: 12px;
+          background: rgba(0, 180, 255, 0.05);
+          padding: 12px 16px;
+          border-radius: 10px;
+          border: 1px solid rgba(0, 180, 255, 0.1);
         }
 
-        .detail-item .label {
+        .detail-icon {
+          font-size: 18px;
+          opacity: 0.8;
+        }
+
+        .detail-content {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .detail-content .label {
           color: rgba(255, 255, 255, 0.6);
-          font-size: 12px;
+          font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           font-weight: 500;
         }
 
-        .detail-item .value {
+        .detail-content .value {
           color: #ffffff;
-          font-weight: 600;
-          font-size: 14px;
+          font-weight: 700;
+          font-size: 15px;
         }
 
         .exercise-notes {
-          color: rgba(255, 255, 255, 0.8);
+          background: linear-gradient(135deg, rgba(0, 180, 255, 0.1), rgba(255, 138, 0, 0.05));
+          padding: 16px;
+          border-radius: 12px;
+          border: 1px solid rgba(0, 180, 255, 0.2);
+          backdrop-filter: blur(10px);
+        }
+
+        .notes-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 8px;
+          color: #00b4ff;
+          font-weight: 600;
+        }
+
+        .exercise-notes p {
+          color: rgba(255, 255, 255, 0.9);
           font-size: 14px;
-          background: rgba(255, 255, 255, 0.05);
-          padding: 8px 12px;
-          border-radius: 6px;
-          border-left: 3px solid #00b4ff;
+          line-height: 1.5;
+          margin: 0;
         }
 
         .modal-overlay {
@@ -516,44 +772,82 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.8);
+          background: rgba(0, 0, 0, 0.9);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 2000;
           padding: 20px;
+          backdrop-filter: blur(10px);
         }
 
         .modal-content {
-          background: rgba(15, 23, 32, 0.95);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 16px;
-          padding: 24px;
+          background: linear-gradient(135deg, rgba(15, 23, 32, 0.98), rgba(11, 15, 20, 0.98));
+          border: 2px solid rgba(0, 180, 255, 0.4);
+          border-radius: 20px;
+          padding: 32px;
           max-width: 500px;
           width: 100%;
-          backdrop-filter: blur(20px);
+          backdrop-filter: blur(30px);
+          box-shadow: 0 20px 60px rgba(0, 180, 255, 0.3);
         }
 
         .no-plans {
           text-align: center;
-          padding: 60px 20px;
-          color: rgba(255, 255, 255, 0.7);
+          padding: 80px 20px;
+          background: linear-gradient(135deg, rgba(15, 23, 32, 0.6), rgba(11, 15, 20, 0.6));
+          border-radius: 20px;
+          border: 2px dashed rgba(0, 180, 255, 0.3);
+          backdrop-filter: blur(20px);
         }
 
-        .no-plans button {
+        .no-plans-icon {
+          font-size: 64px;
+          margin-bottom: 20px;
+          opacity: 0.6;
+        }
+
+        .no-plans h3 {
+          color: #ffffff;
+          font-size: 24px;
+          margin: 0 0 12px 0;
+          font-weight: 600;
+        }
+
+        .no-plans p {
+          color: rgba(255, 255, 255, 0.7);
+          margin: 0 0 24px 0;
+          font-size: 16px;
+        }
+
+        .create-plan-btn {
           background: linear-gradient(135deg, #00b4ff, #0099cc);
           color: #ffffff;
           border: none;
-          border-radius: 8px;
-          padding: 12px 24px;
+          border-radius: 12px;
+          padding: 16px 32px;
           font-weight: 600;
           cursor: pointer;
-          margin-top: 16px;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          transition: all 0.3s ease;
+          font-size: 16px;
+        }
+
+        .create-plan-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 30px rgba(0, 180, 255, 0.4);
         }
 
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        @keyframes scanline {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
 
         @media (max-width: 768px) {
@@ -562,17 +856,47 @@ const WorkoutPlanner: React.FC<WorkoutPlannerProps> = ({ user }) => {
           }
 
           .plan-header {
+            padding: 24px;
+          }
+
+          .day-selector {
+            grid-template-columns: 1fr;
+          }
+
+          .day-header {
             flex-direction: column;
             gap: 16px;
             align-items: stretch;
           }
 
-          .exercise-details {
+          .detail-grid {
             grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
           }
 
           .header-section h1 {
-            font-size: 28px;
+            font-size: 32px;
+          }
+
+          .modal-content {
+            padding: 24px;
+          }
+
+          .exercise-card {
+            padding: 20px;
+            gap: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .detail-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .exercise-number {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
           }
         }
       `}</style>

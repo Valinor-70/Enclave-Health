@@ -202,90 +202,107 @@ export class EvaluationModel {
 
   // Program templates
   private static getStrengthProgram(_level: string): WorkoutProgram {
-    const beginner: WorkoutDay[] = [
+    const strength: WorkoutDay[] = [
       {
-        name: 'Day A',
+        name: 'Day 1: Squat Focus',
         exercises: [
-          { name: 'Squat', sets: 3, reps: '5', restTime: 180 },
-          { name: 'Bench Press', sets: 3, reps: '5', restTime: 180 },
-          { name: 'Bent-over Row', sets: 3, reps: '5', restTime: 180 },
-          { name: 'Overhead Press', sets: 2, reps: '8', restTime: 120 },
-          { name: 'Romanian Deadlift', sets: 2, reps: '8', restTime: 120 }
+          { name: 'Back Squat', sets: 5, reps: '5', restTime: 180, notes: 'Main strength movement - progressive overload' },
+          { name: 'Romanian Deadlift', sets: 4, reps: '6-8', restTime: 150, notes: 'Hip hinge pattern, hamstring development' },
+          { name: 'Bulgarian Split Squat', sets: 3, reps: '8-10 each', restTime: 90, notes: 'Unilateral strength and stability' },
+          { name: 'Barbell Row', sets: 4, reps: '6-8', restTime: 120, notes: 'Upper back strength for squat support' },
+          { name: 'Overhead Press', sets: 3, reps: '8-10', restTime: 120, notes: 'Shoulder stability and strength' },
+          { name: 'Walking Lunges', sets: 3, reps: '10 each', restTime: 90, notes: 'Functional strength pattern' },
+          { name: 'Plank', sets: 3, reps: '60s', restTime: 60, notes: 'Core stability for compound lifts' }
         ]
       },
       {
-        name: 'Day B',
+        name: 'Day 2: Bench Focus',
         exercises: [
-          { name: 'Deadlift', sets: 1, reps: '5', restTime: 240 },
-          { name: 'Overhead Press', sets: 3, reps: '5', restTime: 180 },
-          { name: 'Squat', sets: 3, reps: '5', restTime: 180, weight: 0.9 },
-          { name: 'Pull-ups/Chin-ups', sets: 2, reps: 'AMRAP', restTime: 120 },
-          { name: 'Dips', sets: 2, reps: '8-12', restTime: 120 }
+          { name: 'Bench Press', sets: 5, reps: '5', restTime: 180, notes: 'Main upper body strength movement' },
+          { name: 'Deadlift', sets: 4, reps: '5', restTime: 180, notes: 'Pull pattern to balance push' },
+          { name: 'Incline Dumbbell Press', sets: 3, reps: '8-10', restTime: 120, notes: 'Upper chest development' },
+          { name: 'Pull-ups/Chin-ups', sets: 4, reps: '5-8', restTime: 120, notes: 'Vertical pull strength' },
+          { name: 'Dips', sets: 3, reps: '8-12', restTime: 90, notes: 'Tricep and chest strength' },
+          { name: 'Barbell Curls', sets: 3, reps: '8-10', restTime: 75, notes: 'Bicep strength for pulling' },
+          { name: 'Close-Grip Push-ups', sets: 2, reps: 'AMRAP', restTime: 60, notes: 'Tricep endurance finisher' }
+        ]
+      },
+      {
+        name: 'Day 3: Deadlift Focus',
+        exercises: [
+          { name: 'Deadlift', sets: 5, reps: '5', restTime: 240, notes: 'Main posterior chain strength movement' },
+          { name: 'Front Squat', sets: 4, reps: '6-8', restTime: 150, notes: 'Quad dominant squat variation' },
+          { name: 'Bent-over Row', sets: 4, reps: '6-8', restTime: 120, notes: 'Horizontal pull strength' },
+          { name: 'Overhead Press', sets: 4, reps: '6-8', restTime: 120, notes: 'Vertical push strength' },
+          { name: 'Good Mornings', sets: 3, reps: '10-12', restTime: 90, notes: 'Hip hinge pattern reinforcement' },
+          { name: 'Farmer\'s Walk', sets: 3, reps: '40m', restTime: 90, notes: 'Grip strength and core stability' },
+          { name: 'Hanging Leg Raises', sets: 3, reps: '8-12', restTime: 75, notes: 'Core strength for deadlifts' }
         ]
       }
     ];
 
     return {
-      name: 'Starting Strength Program',
+      name: '3-Day Strength Training Split',
       type: 'strength',
       frequency: 3,
       duration: 12,
-      workouts: beginner
+      workouts: strength
     };
   }
 
   private static getHypertrophyProgram(_level: string): WorkoutProgram {
     const hypertrophy: WorkoutDay[] = [
       {
-        name: 'Upper Body A',
+        name: 'Push Day (Chest, Shoulders, Triceps)',
         exercises: [
-          { name: 'Bench Press', sets: 4, reps: '8-10', restTime: 120 },
-          { name: 'Bent-over Row', sets: 4, reps: '8-10', restTime: 120 },
-          { name: 'Overhead Press', sets: 3, reps: '10-12', restTime: 90 },
-          { name: 'Lat Pulldown', sets: 3, reps: '10-12', restTime: 90 },
-          { name: 'Dips', sets: 3, reps: '12-15', restTime: 90 },
-          { name: 'Barbell Curls', sets: 3, reps: '12-15', restTime: 60 }
+          { name: 'Barbell Bench Press', sets: 4, reps: '6-8', restTime: 180, notes: 'Compound movement for overall chest development' },
+          { name: 'Incline Dumbbell Press', sets: 4, reps: '8-10', restTime: 120, notes: 'Upper chest focus, 30-45 degree angle' },
+          { name: 'Overhead Press', sets: 4, reps: '6-8', restTime: 150, notes: 'Main shoulder builder, keep core tight' },
+          { name: 'Dumbbell Lateral Raises', sets: 4, reps: '12-15', restTime: 90, notes: 'Slow controlled movement, feel the burn' },
+          { name: 'Dips', sets: 3, reps: '10-15', restTime: 90, notes: 'Lean forward for chest, upright for triceps' },
+          { name: 'Close-Grip Bench Press', sets: 3, reps: '8-12', restTime: 120, notes: 'Hands 12-16 inches apart, tricep focus' },
+          { name: 'Cable Lateral Raises', sets: 3, reps: '15-20', restTime: 60, notes: 'Constant tension through ROM' },
+          { name: 'Tricep Pushdowns', sets: 4, reps: '12-15', restTime: 75, notes: 'Keep elbows locked at sides' },
+          { name: 'Overhead Tricep Extension', sets: 3, reps: '12-15', restTime: 75, notes: 'Full stretch at bottom' },
+          { name: 'Diamond Push-ups', sets: 2, reps: 'AMRAP', restTime: 60, notes: 'Burnout set to finish' }
         ]
       },
       {
-        name: 'Lower Body A',
+        name: 'Pull Day (Back, Biceps, Rear Delts)',
         exercises: [
-          { name: 'Squat', sets: 4, reps: '8-10', restTime: 150 },
-          { name: 'Romanian Deadlift', sets: 4, reps: '10-12', restTime: 120 },
-          { name: 'Bulgarian Split Squat', sets: 3, reps: '12-15', restTime: 90 },
-          { name: 'Walking Lunges', sets: 3, reps: '12-15', restTime: 90 },
-          { name: 'Calf Raises', sets: 4, reps: '15-20', restTime: 60 },
-          { name: 'Plank', sets: 3, reps: '60s', restTime: 60 }
+          { name: 'Deadlift', sets: 4, reps: '5-6', restTime: 180, notes: 'King of all lifts, perfect form essential' },
+          { name: 'Pull-ups/Chin-ups', sets: 4, reps: '6-12', restTime: 120, notes: 'Add weight if doing 12+ reps easily' },
+          { name: 'Bent-over Barbell Row', sets: 4, reps: '8-10', restTime: 120, notes: 'Pull to lower chest, squeeze at top' },
+          { name: 'Seated Cable Row', sets: 4, reps: '10-12', restTime: 90, notes: 'Pull to abdomen, retract shoulder blades' },
+          { name: 'Lat Pulldown', sets: 3, reps: '10-12', restTime: 90, notes: 'Wide grip, pull to upper chest' },
+          { name: 'T-Bar Row', sets: 3, reps: '10-12', restTime: 90, notes: 'Chest supported if available' },
+          { name: 'Barbell Curls', sets: 4, reps: '10-12', restTime: 75, notes: 'No swinging, control the weight' },
+          { name: 'Hammer Curls', sets: 3, reps: '12-15', restTime: 60, notes: 'Neutral grip, hit brachialis' },
+          { name: 'Cable Reverse Fly', sets: 3, reps: '15-20', restTime: 60, notes: 'Rear delt isolation' },
+          { name: 'Face Pulls', sets: 3, reps: '15-20', restTime: 60, notes: 'High elbows, pull to face level' }
         ]
       },
       {
-        name: 'Upper Body B',
+        name: 'Legs Day (Quads, Hamstrings, Glutes, Calves)',
         exercises: [
-          { name: 'Incline Dumbbell Press', sets: 4, reps: '8-10', restTime: 120 },
-          { name: 'Seated Cable Row', sets: 4, reps: '8-10', restTime: 120 },
-          { name: 'Dumbbell Shoulder Press', sets: 3, reps: '10-12', restTime: 90 },
-          { name: 'Pull-ups', sets: 3, reps: 'AMRAP', restTime: 90 },
-          { name: 'Tricep Extensions', sets: 3, reps: '12-15', restTime: 60 },
-          { name: 'Hammer Curls', sets: 3, reps: '12-15', restTime: 60 }
-        ]
-      },
-      {
-        name: 'Lower Body B',
-        exercises: [
-          { name: 'Deadlift', sets: 4, reps: '6-8', restTime: 180 },
-          { name: 'Front Squat', sets: 3, reps: '10-12', restTime: 120 },
-          { name: 'Leg Curls', sets: 3, reps: '12-15', restTime: 90 },
-          { name: 'Leg Press', sets: 3, reps: '15-20', restTime: 90 },
-          { name: 'Standing Calf Raises', sets: 4, reps: '15-20', restTime: 60 },
-          { name: 'Russian Twists', sets: 3, reps: '20', restTime: 60 }
+          { name: 'Back Squat', sets: 4, reps: '6-8', restTime: 180, notes: 'King of leg exercises, go deep' },
+          { name: 'Romanian Deadlift', sets: 4, reps: '8-10', restTime: 150, notes: 'Hip hinge movement, feel hamstring stretch' },
+          { name: 'Bulgarian Split Squat', sets: 3, reps: '10-12 each', restTime: 90, notes: 'Rear foot elevated, front leg focus' },
+          { name: 'Leg Press', sets: 4, reps: '12-15', restTime: 120, notes: 'Feet high and wide for glute activation' },
+          { name: 'Walking Lunges', sets: 3, reps: '12-15 each', restTime: 90, notes: 'Long steps, knee to floor' },
+          { name: 'Leg Curls', sets: 4, reps: '12-15', restTime: 75, notes: 'Lying or seated, control the negative' },
+          { name: 'Leg Extension', sets: 3, reps: '15-20', restTime: 75, notes: 'Quad isolation, squeeze at top' },
+          { name: 'Calf Raises', sets: 5, reps: '15-20', restTime: 60, notes: 'Full range, pause at top' },
+          { name: 'Seated Calf Raises', sets: 3, reps: '20-25', restTime: 60, notes: 'Soleus focus' },
+          { name: 'Stiff Leg Deadlift', sets: 3, reps: '12-15', restTime: 90, notes: 'Hamstring and glute stretch' }
         ]
       }
     ];
 
     return {
-      name: 'Upper/Lower Hypertrophy Split',
+      name: '3-Day Push/Pull/Legs Split',
       type: 'hypertrophy',
-      frequency: 4,
+      frequency: 3,
       duration: 8,
       workouts: hypertrophy
     };
@@ -294,42 +311,54 @@ export class EvaluationModel {
   private static getFatLossProgram(_level: string): WorkoutProgram {
     const fatLoss: WorkoutDay[] = [
       {
-        name: 'Full Body Circuit A',
+        name: 'Day 1: Upper Body Circuit',
         exercises: [
-          { name: 'Goblet Squats', sets: 3, reps: '15', restTime: 45 },
-          { name: 'Push-ups', sets: 3, reps: '12-15', restTime: 45 },
-          { name: 'Bent-over Dumbbell Rows', sets: 3, reps: '12', restTime: 45 },
-          { name: 'Mountain Climbers', sets: 3, reps: '20', restTime: 45 },
-          { name: 'Plank', sets: 3, reps: '45s', restTime: 45 },
-          { name: 'Burpees', sets: 3, reps: '8-10', restTime: 60 }
+          { name: 'Push-ups', sets: 4, reps: '12-15', restTime: 45, notes: 'Modify on knees if needed' },
+          { name: 'Bent-over Dumbbell Rows', sets: 4, reps: '12-15', restTime: 45, notes: 'Keep back straight, squeeze shoulder blades' },
+          { name: 'Overhead Press', sets: 3, reps: '10-12', restTime: 60, notes: 'Use dumbbells or barbell' },
+          { name: 'Lat Pulldown', sets: 3, reps: '12-15', restTime: 45, notes: 'Wide grip, pull to chest' },
+          { name: 'Dips', sets: 3, reps: '8-12', restTime: 45, notes: 'Assisted if needed' },
+          { name: 'Mountain Climbers', sets: 3, reps: '20 each', restTime: 30, notes: 'Keep core tight, fast pace' },
+          { name: 'Tricep Pushdowns', sets: 3, reps: '15', restTime: 30, notes: 'High rep for metabolic stress' },
+          { name: 'Barbell Curls', sets: 3, reps: '12-15', restTime: 30, notes: 'Control the weight' },
+          { name: 'Plank', sets: 3, reps: '45s', restTime: 30, notes: 'Hold strong position' },
+          { name: 'Burpees', sets: 2, reps: '8-10', restTime: 60, notes: 'High intensity finisher' }
         ]
       },
       {
-        name: 'Full Body Circuit B',
+        name: 'Day 2: Lower Body Circuit',
         exercises: [
-          { name: 'Deadlifts', sets: 3, reps: '10', restTime: 60 },
-          { name: 'Overhead Press', sets: 3, reps: '10', restTime: 45 },
-          { name: 'Lunges', sets: 3, reps: '12 each leg', restTime: 45 },
-          { name: 'Jumping Jacks', sets: 3, reps: '30', restTime: 30 },
-          { name: 'Russian Twists', sets: 3, reps: '20', restTime: 30 },
-          { name: 'High Knees', sets: 3, reps: '30s', restTime: 45 }
+          { name: 'Goblet Squats', sets: 4, reps: '15-20', restTime: 45, notes: 'Hold weight at chest, deep squat' },
+          { name: 'Romanian Deadlift', sets: 4, reps: '12-15', restTime: 60, notes: 'Hip hinge, feel hamstring stretch' },
+          { name: 'Walking Lunges', sets: 3, reps: '12 each', restTime: 45, notes: 'Long steps, knee to ground' },
+          { name: 'Leg Press', sets: 3, reps: '15-20', restTime: 45, notes: 'Higher reps for fat loss' },
+          { name: 'Jump Squats', sets: 3, reps: '12-15', restTime: 30, notes: 'Explosive movement' },
+          { name: 'Leg Curls', sets: 3, reps: '15', restTime: 30, notes: 'Hamstring isolation' },
+          { name: 'Calf Raises', sets: 4, reps: '20', restTime: 30, notes: 'High volume for endurance' },
+          { name: 'Wall Sit', sets: 3, reps: '45s', restTime: 30, notes: 'Isometric quad burner' },
+          { name: 'High Knees', sets: 3, reps: '30s', restTime: 30, notes: 'Cardio burst' },
+          { name: 'Bulgarian Split Squats', sets: 2, reps: '10 each', restTime: 45, notes: 'Unilateral finisher' }
         ]
       },
       {
-        name: 'Full Body Circuit C',
+        name: 'Day 3: Full Body HIIT',
         exercises: [
-          { name: 'Thrusters', sets: 3, reps: '12', restTime: 45 },
-          { name: 'Renegade Rows', sets: 3, reps: '8 each arm', restTime: 60 },
-          { name: 'Jump Squats', sets: 3, reps: '15', restTime: 45 },
-          { name: 'Bicycle Crunches', sets: 3, reps: '20', restTime: 30 },
-          { name: 'Bear Crawl', sets: 3, reps: '30s', restTime: 45 },
-          { name: 'Battle Ropes', sets: 3, reps: '30s', restTime: 60 }
+          { name: 'Thrusters', sets: 4, reps: '12', restTime: 45, notes: 'Squat to overhead press combo' },
+          { name: 'Renegade Rows', sets: 3, reps: '8 each', restTime: 60, notes: 'Plank position, row each arm' },
+          { name: 'Kettlebell Swings', sets: 4, reps: '20', restTime: 45, notes: 'Hip hinge explosive movement' },
+          { name: 'Box Jumps', sets: 3, reps: '10', restTime: 45, notes: 'Step down to reduce impact' },
+          { name: 'Battle Ropes', sets: 3, reps: '30s', restTime: 30, notes: 'All-out intensity' },
+          { name: 'Bear Crawl', sets: 3, reps: '20 steps', restTime: 45, notes: 'Keep hips low' },
+          { name: 'Bicycle Crunches', sets: 3, reps: '20 each', restTime: 30, notes: 'Control the movement' },
+          { name: 'Jumping Jacks', sets: 3, reps: '30', restTime: 30, notes: 'Classic cardio move' },
+          { name: 'Russian Twists', sets: 3, reps: '20 each', restTime: 30, notes: 'Rotate through core' },
+          { name: 'Sprawls', sets: 2, reps: '10', restTime: 60, notes: 'Burpee without jump, conditioning' }
         ]
       }
     ];
 
     return {
-      name: 'Fat Loss Circuit Training',
+      name: '3-Day Fat Loss Circuit Split',
       type: 'fat_loss',
       frequency: 3,
       duration: 6,
