@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
+import './EnclaveUI.css';
 
 // Base HUD Card Component
 interface EnclaveCardProps extends HTMLMotionProps<"div"> {
@@ -59,52 +60,6 @@ export const EnclaveCard: React.FC<EnclaveCardProps> = ({
       </div>
       
       {children}
-      
-      <style jsx>{`
-        .enclave-corners {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          pointer-events: none;
-        }
-        
-        .corner {
-          position: absolute;
-          width: 12px;
-          height: 12px;
-          border: 2px solid var(--enclave-primary);
-        }
-        
-        .corner-tl {
-          top: -1px;
-          left: -1px;
-          border-right: none;
-          border-bottom: none;
-        }
-        
-        .corner-tr {
-          top: -1px;
-          right: -1px;
-          border-left: none;
-          border-bottom: none;
-        }
-        
-        .corner-bl {
-          bottom: -1px;
-          left: -1px;
-          border-right: none;
-          border-top: none;
-        }
-        
-        .corner-br {
-          bottom: -1px;
-          right: -1px;
-          border-left: none;
-          border-top: none;
-        }
-      `}</style>
     </motion.div>
   );
 };
@@ -261,48 +216,6 @@ export const EnclaveProgress: React.FC<EnclaveProgressProps> = ({
           }}
         />
       </div>
-
-      <style jsx>{`
-        .enclave-progress {
-          width: 100%;
-        }
-        
-        .progress-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 8px;
-        }
-        
-        .progress-label {
-          font-family: var(--font-body);
-          font-size: 14px;
-          color: var(--enclave-text-secondary);
-          font-weight: 500;
-        }
-        
-        .progress-value {
-          font-family: var(--font-heading);
-          font-size: 14px;
-          color: var(--enclave-primary);
-          font-weight: 600;
-        }
-        
-        .progress-track {
-          width: 100%;
-          height: 8px;
-          background: var(--enclave-bg-tertiary);
-          border-radius: 4px;
-          overflow: hidden;
-          border: 1px solid var(--enclave-border);
-        }
-        
-        .progress-fill {
-          height: 100%;
-          border-radius: 4px;
-          transition: box-shadow 0.3s ease;
-        }
-      `}</style>
     </div>
   );
 };
@@ -352,46 +265,6 @@ export const EnclaveToggle: React.FC<EnclaveToggleProps> = ({
           />
         </motion.div>
       </motion.button>
-
-      <style jsx>{`
-        .enclave-toggle-container {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        
-        .toggle-label {
-          font-family: var(--font-body);
-          font-size: 14px;
-          color: var(--enclave-text-secondary);
-          font-weight: 500;
-        }
-        
-        .enclave-toggle {
-          background: none;
-          border: none;
-          cursor: ${disabled ? 'not-allowed' : 'pointer'};
-          opacity: ${disabled ? 0.5 : 1};
-        }
-        
-        .toggle-track {
-          width: 48px;
-          height: 24px;
-          border-radius: 12px;
-          border: 1px solid var(--enclave-border);
-          position: relative;
-          display: flex;
-          align-items: center;
-          padding: 2px;
-        }
-        
-        .toggle-thumb {
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          border: 1px solid var(--enclave-border);
-        }
-      `}</style>
     </div>
   );
 };

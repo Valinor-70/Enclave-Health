@@ -336,7 +336,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         <div className="progress-section">
           <div className="hud-progress-container">
             <div className="progress-segments">
-              {steps.map((step, index) => (
+              {steps.map((_, index) => (
                 <motion.div
                   key={index}
                   className={`progress-segment ${index <= currentStep ? 'active' : ''}`}
