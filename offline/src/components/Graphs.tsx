@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LineChart, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { UserProfile, db, dbHelpers, ProgressEntry, WorkoutLog } from '../db/db';
+import { EnclaveCard, EnclaveButton } from './EnclaveUI';
 
 interface GraphsProps {
   user: UserProfile;
@@ -178,223 +179,393 @@ const Graphs: React.FC<GraphsProps> = ({ user }) => {
 
   return (
     <div className="graphs">
+      {/* Enhanced Header with HUD styling */}
       <motion.div 
-        className="header-section"
+        className="analytics-header"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1>Progress Analytics</h1>
-        <p>Track your fitness journey with detailed insights</p>
+        <div className="header-content">
+          <h1>Progress Analytics</h1>
+          <p>Track your fitness journey with detailed insights</p>
+          <div className="scan-lines"></div>
+        </div>
       </motion.div>
 
-      {/* Time Range Selector */}
+      {/* Enhanced Time Range Selector */}
       <motion.div 
-        className="time-range-selector"
+        className="time-range-section"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
       >
-        <div className="selector-label">Time Range:</div>
-        <div className="selector-buttons">
-          {(['week', 'month', '3months', '6months'] as const).map(range => (
-            <button
-              key={range}
-              className={`range-btn ${selectedTimeRange === range ? 'active' : ''}`}
-              onClick={() => setSelectedTimeRange(range)}
-            >
-              {range === 'week' ? '7D' : range === 'month' ? '1M' : range === '3months' ? '3M' : '6M'}
-            </button>
-          ))}
-        </div>
+        <EnclaveCard variant="primary" glowing={true}>
+          <div className="range-selector-content">
+            <div className="selector-label">
+              <span className="label-text">Temporal Range:</span>
+              <div className="label-indicator"></div>
+            </div>
+            <div className="selector-buttons">
+              {(['week', 'month', '3months', '6months'] as const).map(range => (
+                <EnclaveButton
+                  key={range}
+                  variant={selectedTimeRange === range ? 'primary' : 'secondary'}
+                  size="sm"
+                  onClick={() => setSelectedTimeRange(range)}
+                  plasma={selectedTimeRange === range}
+                >
+                  {range === 'week' ? '7D' : range === 'month' ? '1M' : range === '3months' ? '3M' : '6M'}
+                </EnclaveButton>
+              ))}
+            </div>
+          </div>
+        </EnclaveCard>
       </motion.div>
 
-      {/* Charts Grid */}
+      {/* Enhanced Charts Grid */}
       <div className="charts-grid">
-        {/* Weight Progress Chart */}
+        {/* Weight Progress Chart with HUD styling */}
         <motion.div 
-          className="chart-card"
+          className="chart-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <div className="chart-header">
-            <h3>Weight Progress</h3>
-            <div className="chart-subtitle">{getTimeRangeLabel()}</div>
-          </div>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={weightData}>
-                <defs>
-                  <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00b4ff" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#00b4ff" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis 
-                  dataKey="date" 
-                  stroke="rgba(255,255,255,0.6)"
-                  fontSize={12}
-                />
-                <YAxis 
-                  stroke="rgba(255,255,255,0.6)"
-                  fontSize={12}
-                  domain={['dataMin - 2', 'dataMax + 2']}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'rgba(15, 23, 32, 0.9)',
-                    border: '1px solid rgba(0, 180, 255, 0.3)',
-                    borderRadius: '8px',
-                    color: '#ffffff'
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="weight"
-                  stroke="#00b4ff"
-                  strokeWidth={3}
-                  fill="url(#weightGradient)"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <EnclaveCard variant="primary" glowing={true}>
+            <div className="chart-header">
+              <div className="chart-title">
+                <h3>Weight Progress</h3>
+                <div className="chart-status">MONITORING</div>
+              </div>
+              <div className="chart-subtitle">{getTimeRangeLabel()}</div>
+            </div>
+            <div className="chart-container">
+              <div className="chart-grid-overlay"></div>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={weightData}>
+                  <defs>
+                    <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--enclave-primary)" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="var(--enclave-primary)" stopOpacity={0}/>
+                    </linearGradient>
+                    <filter id="glow">
+                      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                      <feMerge> 
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <CartesianGrid 
+                    strokeDasharray="2 2" 
+                    stroke="rgba(0, 180, 255, 0.2)" 
+                    className="chart-grid"
+                  />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="var(--enclave-text-secondary)"
+                    fontSize={11}
+                    fontFamily="var(--font-heading)"
+                  />
+                  <YAxis 
+                    stroke="var(--enclave-text-secondary)"
+                    fontSize={11}
+                    fontFamily="var(--font-heading)"
+                    domain={['dataMin - 2', 'dataMax + 2']}
+                  />
+                  <Tooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="hud-tooltip">
+                            <div className="tooltip-header">Weight Scan</div>
+                            <div className="tooltip-data">
+                              <span className="tooltip-label">Date:</span>
+                              <span className="tooltip-value">{label}</span>
+                            </div>
+                            <div className="tooltip-data">
+                              <span className="tooltip-label">Weight:</span>
+                              <span className="tooltip-value">{payload[0].value} kg</span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="weight"
+                    stroke="var(--enclave-primary)"
+                    strokeWidth={3}
+                    fill="url(#weightGradient)"
+                    filter="url(#glow)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </EnclaveCard>
         </motion.div>
 
-        {/* Strength Progress Chart */}
+        {/* Strength Progress Chart with HUD styling */}
         <motion.div 
-          className="chart-card"
+          className="chart-section"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <div className="chart-header">
-            <h3>Strength Progress</h3>
-            <div className="chart-subtitle">Current vs Previous (kg)</div>
-          </div>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={strengthData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis 
-                  dataKey="exercise" 
-                  stroke="rgba(255,255,255,0.6)"
-                  fontSize={11}
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis stroke="rgba(255,255,255,0.6)" fontSize={12} />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'rgba(15, 23, 32, 0.9)',
-                    border: '1px solid rgba(0, 180, 255, 0.3)',
-                    borderRadius: '8px',
-                    color: '#ffffff'
-                  }}
-                />
-                <Bar dataKey="previous" fill="rgba(255, 255, 255, 0.3)" name="Previous" />
-                <Bar dataKey="current" fill="#00b4ff" name="Current" />
-                <Bar dataKey="target" fill="rgba(255, 138, 0, 0.7)" name="Target" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <EnclaveCard variant="primary" glowing={true}>
+            <div className="chart-header">
+              <div className="chart-title">
+                <h3>Strength Progress</h3>
+                <div className="chart-status">ANALYZING</div>
+              </div>
+              <div className="chart-subtitle">Current vs Previous (kg)</div>
+            </div>
+            <div className="chart-container">
+              <div className="chart-grid-overlay"></div>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={strengthData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                  <defs>
+                    <filter id="barGlow">
+                      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                      <feMerge> 
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <CartesianGrid 
+                    strokeDasharray="2 2" 
+                    stroke="rgba(0, 180, 255, 0.2)"
+                    className="chart-grid"
+                  />
+                  <XAxis 
+                    dataKey="exercise" 
+                    stroke="var(--enclave-text-secondary)"
+                    fontSize={10}
+                    fontFamily="var(--font-heading)"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis 
+                    stroke="var(--enclave-text-secondary)" 
+                    fontSize={11}
+                    fontFamily="var(--font-heading)"
+                  />
+                  <Tooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="hud-tooltip">
+                            <div className="tooltip-header">Strength Analysis</div>
+                            <div className="tooltip-data">
+                              <span className="tooltip-label">Exercise:</span>
+                              <span className="tooltip-value">{label}</span>
+                            </div>
+                            {payload.map((entry, index) => (
+                              <div key={index} className="tooltip-data">
+                                <span className="tooltip-label">{entry.name}:</span>
+                                <span className="tooltip-value">{entry.value} kg</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar 
+                    dataKey="previous" 
+                    fill="var(--enclave-text-dim)" 
+                    name="Previous"
+                    filter="url(#barGlow)"
+                  />
+                  <Bar 
+                    dataKey="current" 
+                    fill="var(--enclave-primary)" 
+                    name="Current"
+                    filter="url(#barGlow)"
+                  />
+                  <Bar 
+                    dataKey="target" 
+                    fill="var(--enclave-accent)" 
+                    name="Target"
+                    filter="url(#barGlow)"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </EnclaveCard>
         </motion.div>
 
-        {/* Calorie Tracking Chart */}
+        {/* Calorie Tracking Chart with HUD styling */}
         <motion.div 
-          className="chart-card full-width"
+          className="chart-section full-width"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <div className="chart-header">
-            <h3>Calorie Intake vs Target</h3>
-            <div className="chart-subtitle">Last 7 Days</div>
-          </div>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={calorieData}>
-                <defs>
-                  <linearGradient id="targetGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ff8a00" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#ff8a00" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00b4ff" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#00b4ff" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="day" stroke="rgba(255,255,255,0.6)" fontSize={12} />
-                <YAxis stroke="rgba(255,255,255,0.6)" fontSize={12} />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'rgba(15, 23, 32, 0.9)',
-                    border: '1px solid rgba(0, 180, 255, 0.3)',
-                    borderRadius: '8px',
-                    color: '#ffffff'
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="target"
-                  stackId="1"
-                  stroke="#ff8a00"
-                  strokeWidth={2}
-                  fill="url(#targetGradient)"
-                  name="Target"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="actual"
-                  stackId="2"
-                  stroke="#00b4ff"
-                  strokeWidth={2}
-                  fill="url(#actualGradient)"
-                  name="Actual"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          <EnclaveCard variant="primary" glowing={true}>
+            <div className="chart-header">
+              <div className="chart-title">
+                <h3>Calorie Intake vs Target</h3>
+                <div className="chart-status">TRACKING</div>
+              </div>
+              <div className="chart-subtitle">Last 7 Days</div>
+            </div>
+            <div className="chart-container">
+              <div className="chart-grid-overlay"></div>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={calorieData}>
+                  <defs>
+                    <linearGradient id="targetGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--enclave-accent)" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="var(--enclave-accent)" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--enclave-primary)" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="var(--enclave-primary)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid 
+                    strokeDasharray="2 2" 
+                    stroke="rgba(0, 180, 255, 0.2)"
+                    className="chart-grid"
+                  />
+                  <XAxis 
+                    dataKey="day" 
+                    stroke="var(--enclave-text-secondary)" 
+                    fontSize={11}
+                    fontFamily="var(--font-heading)"
+                  />
+                  <YAxis 
+                    stroke="var(--enclave-text-secondary)" 
+                    fontSize={11}
+                    fontFamily="var(--font-heading)"
+                  />
+                  <Tooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="hud-tooltip">
+                            <div className="tooltip-header">Calorie Analysis</div>
+                            <div className="tooltip-data">
+                              <span className="tooltip-label">Day:</span>
+                              <span className="tooltip-value">{label}</span>
+                            </div>
+                            {payload.map((entry, index) => (
+                              <div key={index} className="tooltip-data">
+                                <span className="tooltip-label">{entry.name}:</span>
+                                <span className="tooltip-value">{entry.value} kcal</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="target"
+                    stackId="1"
+                    stroke="var(--enclave-accent)"
+                    strokeWidth={2}
+                    fill="url(#targetGradient)"
+                    name="Target"
+                    filter="url(#glow)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="actual"
+                    stackId="2"
+                    stroke="var(--enclave-primary)"
+                    strokeWidth={2}
+                    fill="url(#actualGradient)"
+                    name="Actual"
+                    filter="url(#glow)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </EnclaveCard>
         </motion.div>
 
-        {/* Stats Summary */}
+        {/* Enhanced Stats Summary */}
         <motion.div 
-          className="stats-summary"
+          className="stats-summary full-width"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          <h3>Progress Summary</h3>
-          <div className="summary-grid">
-            <div className="summary-item">
-              <div className="summary-label">Weight Change</div>
-              <div className="summary-value">
-                {weightData.length >= 2 ? 
-                  `${((weightData[weightData.length - 1]?.weight || 0) - (weightData[0]?.weight || 0)).toFixed(1)} kg` : 
-                  'N/A'
-                }
+          <EnclaveCard variant="primary" glowing={true}>
+            <div className="summary-header">
+              <h3>Progress Summary</h3>
+              <div className="summary-status">COMPILED</div>
+            </div>
+            <div className="summary-grid">
+              <div className="summary-item">
+                <div className="summary-icon">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                    <path d="M16 2L14 8h-4l6 6v16l6-6h4L16 2z"/>
+                  </svg>
+                </div>
+                <div className="summary-content">
+                  <div className="summary-label">Weight Change</div>
+                  <div className="summary-value">
+                    {weightData.length >= 2 ? 
+                      `${((weightData[weightData.length - 1]?.weight || 0) - (weightData[0]?.weight || 0)).toFixed(1)} kg` : 
+                      'N/A'
+                    }
+                  </div>
+                </div>
+              </div>
+              
+              <div className="summary-item">
+                <div className="summary-icon">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                    <path d="M8 4v24l8-8 8 8V4H8z"/>
+                  </svg>
+                </div>
+                <div className="summary-content">
+                  <div className="summary-label">Workouts</div>
+                  <div className="summary-value">{workoutData.filter(w => w.completed).length}</div>
+                </div>
+              </div>
+              
+              <div className="summary-item">
+                <div className="summary-icon">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                    <circle cx="16" cy="16" r="12" strokeWidth="2" stroke="currentColor" fill="none"/>
+                    <path d="M16 8v8l4 4"/>
+                  </svg>
+                </div>
+                <div className="summary-content">
+                  <div className="summary-label">Avg Calories</div>
+                  <div className="summary-value">
+                    {Math.round(calorieData.reduce((sum, day) => sum + day.actual, 0) / calorieData.length)}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="summary-item">
+                <div className="summary-icon">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                    <path d="M16 2L6 12l10 10 10-10L16 2zm0 4l6 6-6 6-6-6 6-6z"/>
+                  </svg>
+                </div>
+                <div className="summary-content">
+                  <div className="summary-label">Consistency</div>
+                  <div className="summary-value">
+                    {Math.round((workoutData.filter(w => w.completed).length / Math.max(workoutData.length, 1)) * 100)}%
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="summary-item">
-              <div className="summary-label">Workouts</div>
-              <div className="summary-value">{workoutData.filter(w => w.completed).length}</div>
-            </div>
-            <div className="summary-item">
-              <div className="summary-label">Avg Calories</div>
-              <div className="summary-value">
-                {Math.round(calorieData.reduce((sum, day) => sum + day.actual, 0) / calorieData.length)}
-              </div>
-            </div>
-            <div className="summary-item">
-              <div className="summary-label">Consistency</div>
-              <div className="summary-value">
-                {Math.round((workoutData.filter(w => w.completed).length / Math.max(workoutData.length, 1)) * 100)}%
-              </div>
-            </div>
-          </div>
+          </EnclaveCard>
         </motion.div>
       </div>
 
@@ -411,172 +582,408 @@ const Graphs: React.FC<GraphsProps> = ({ user }) => {
           align-items: center;
           justify-content: center;
           min-height: 400px;
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--enclave-text-secondary);
         }
 
         .loading-spinner {
           width: 40px;
           height: 40px;
-          border: 3px solid rgba(0, 180, 255, 0.3);
-          border-top: 3px solid #00b4ff;
+          border: 3px solid var(--enclave-border);
+          border-top: 3px solid var(--enclave-primary);
           border-radius: 50%;
           animation: spin 1s linear infinite;
           margin-bottom: 16px;
+          box-shadow: var(--enclave-shadow-glow);
         }
 
-        .header-section {
+        /* Enhanced Analytics Header */
+        .analytics-header {
+          margin-bottom: 40px;
+          position: relative;
+        }
+
+        .header-content {
           text-align: center;
-          margin-bottom: 32px;
+          padding: 40px 32px;
+          background: var(--enclave-bg-secondary);
+          border: 2px solid var(--enclave-border);
+          border-radius: 16px;
+          position: relative;
+          overflow: hidden;
         }
 
-        .header-section h1 {
-          font-family: 'Orbitron', monospace;
-          font-size: 36px;
-          color: #00b4ff;
-          margin: 0 0 8px 0;
-          text-shadow: 0 0 20px rgba(0, 180, 255, 0.5);
+        .header-content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: 
+            linear-gradient(135deg, transparent 0%, var(--enclave-primary-dim) 30%, transparent 70%),
+            radial-gradient(circle at 20% 80%, rgba(0, 180, 255, 0.1) 0%, transparent 50%);
+          pointer-events: none;
         }
 
-        .header-section p {
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 16px;
+        .header-content h1 {
+          font-family: var(--font-display);
+          font-size: 48px;
+          color: var(--enclave-primary);
+          margin: 0 0 16px 0;
+          text-shadow: 0 0 30px var(--enclave-primary-glow);
+          text-transform: uppercase;
+          letter-spacing: 4px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .header-content p {
+          color: var(--enclave-text-secondary);
+          font-size: 18px;
           margin: 0;
+          font-family: var(--font-body);
+          position: relative;
+          z-index: 1;
         }
 
-        .time-range-selector {
+        .scan-lines {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 180, 255, 0.03) 2px,
+            rgba(0, 180, 255, 0.03) 4px
+          );
+          pointer-events: none;
+          animation: scanlines 4s linear infinite;
+        }
+
+        @keyframes scanlines {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(8px); }
+        }
+
+        /* Enhanced Time Range Selector */
+        .time-range-section {
+          margin-bottom: 40px;
+        }
+
+        .range-selector-content {
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 16px;
-          margin-bottom: 32px;
-          padding: 20px;
-          background: rgba(15, 23, 32, 0.8);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 12px;
-          backdrop-filter: blur(10px);
+          justify-content: space-between;
+          padding: 8px;
+          gap: 24px;
         }
 
         .selector-label {
-          color: rgba(255, 255, 255, 0.8);
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .label-text {
+          color: var(--enclave-text-primary);
           font-weight: 600;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .label-indicator {
+          width: 12px;
+          height: 12px;
+          background: var(--enclave-primary);
+          border-radius: 50%;
+          animation: pulse 2s ease-in-out infinite;
+          box-shadow: 0 0 10px var(--enclave-primary-glow);
         }
 
         .selector-buttons {
           display: flex;
-          gap: 8px;
+          gap: 12px;
         }
 
-        .range-btn {
-          background: rgba(255, 255, 255, 0.1);
-          color: rgba(255, 255, 255, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          border-radius: 6px;
-          padding: 8px 16px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-weight: 600;
-          font-size: 14px;
-        }
-
-        .range-btn:hover {
-          background: rgba(0, 180, 255, 0.2);
-          border-color: #00b4ff;
-          color: #00b4ff;
-        }
-
-        .range-btn.active {
-          background: #00b4ff;
-          color: #ffffff;
-          border-color: #00b4ff;
-          box-shadow: 0 0 15px rgba(0, 180, 255, 0.3);
-        }
-
+        /* Enhanced Charts Grid */
         .charts-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-          gap: 24px;
+          gap: 32px;
         }
 
-        .chart-card {
-          background: rgba(15, 23, 32, 0.8);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 16px;
-          padding: 24px;
-          backdrop-filter: blur(10px);
+        .chart-section {
+          position: relative;
         }
 
-        .chart-card.full-width {
+        .chart-section.full-width {
           grid-column: 1 / -1;
         }
 
         .chart-header {
-          margin-bottom: 20px;
+          margin-bottom: 24px;
+          position: relative;
         }
 
-        .chart-header h3 {
-          font-family: 'Orbitron', monospace;
-          color: #00b4ff;
-          font-size: 20px;
-          margin: 0 0 4px 0;
+        .chart-title {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+
+        .chart-title h3 {
+          font-family: var(--font-display);
+          color: var(--enclave-primary);
+          font-size: 24px;
+          margin: 0;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-shadow: 0 0 15px var(--enclave-primary-glow);
+        }
+
+        .chart-status {
+          padding: 4px 12px;
+          background: var(--enclave-primary-glow);
+          color: var(--enclave-primary);
+          border: 1px solid var(--enclave-primary);
+          border-radius: 6px;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          animation: pulse 3s ease-in-out infinite;
         }
 
         .chart-subtitle {
-          color: rgba(255, 255, 255, 0.6);
+          color: var(--enclave-text-secondary);
           font-size: 14px;
+          font-family: var(--font-body);
         }
 
         .chart-container {
           position: relative;
+          border-radius: 12px;
+          overflow: hidden;
+          background: rgba(11, 15, 20, 0.5);
+          border: 1px solid var(--enclave-border);
         }
 
+        .chart-grid-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: 
+            linear-gradient(90deg, transparent 98%, rgba(0, 180, 255, 0.1) 100%),
+            linear-gradient(0deg, transparent 98%, rgba(0, 180, 255, 0.1) 100%);
+          background-size: 20px 20px;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* HUD Tooltip Styling */
+        .hud-tooltip {
+          background: var(--enclave-bg-secondary);
+          border: 2px solid var(--enclave-primary);
+          border-radius: 8px;
+          padding: 16px;
+          box-shadow: var(--enclave-shadow-glow);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .hud-tooltip::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent 0%, var(--enclave-primary-dim) 50%, transparent 100%);
+          pointer-events: none;
+        }
+
+        .tooltip-header {
+          color: var(--enclave-primary);
+          font-family: var(--font-heading);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-size: 12px;
+          margin-bottom: 12px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .tooltip-data {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .tooltip-data:last-child {
+          margin-bottom: 0;
+        }
+
+        .tooltip-label {
+          color: var(--enclave-text-secondary);
+          font-family: var(--font-body);
+          font-size: 14px;
+        }
+
+        .tooltip-value {
+          color: var(--enclave-text-primary);
+          font-family: var(--font-heading);
+          font-weight: 600;
+          text-shadow: 0 0 8px var(--enclave-primary-glow);
+        }
+
+        /* Enhanced Chart Grid Effects */
+        .chart-grid {
+          stroke: rgba(0, 180, 255, 0.2);
+          stroke-dasharray: 2 2;
+          animation: grid-pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes grid-pulse {
+          0%, 100% { stroke-opacity: 0.2; }
+          50% { stroke-opacity: 0.4; }
+        }
+
+        /* Enhanced Stats Summary */
         .stats-summary {
           grid-column: 1 / -1;
-          background: rgba(15, 23, 32, 0.8);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 16px;
-          padding: 24px;
-          backdrop-filter: blur(10px);
         }
 
-        .stats-summary h3 {
-          font-family: 'Orbitron', monospace;
-          color: #00b4ff;
-          font-size: 20px;
-          margin: 0 0 20px 0;
-          text-align: center;
+        .summary-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 32px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid var(--enclave-border);
+        }
+
+        .summary-header h3 {
+          font-family: var(--font-display);
+          color: var(--enclave-primary);
+          font-size: 28px;
+          margin: 0;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-shadow: 0 0 15px var(--enclave-primary-glow);
+        }
+
+        .summary-status {
+          padding: 6px 16px;
+          background: var(--enclave-text-success);
+          color: var(--enclave-bg-primary);
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
         }
 
         .summary-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 20px;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 24px;
         }
 
         .summary-item {
-          text-align: center;
-          padding: 20px;
-          background: rgba(255, 255, 255, 0.05);
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          padding: 24px;
+          background: var(--enclave-bg-tertiary);
+          border: 2px solid var(--enclave-border);
           border-radius: 12px;
-          border: 1px solid rgba(0, 180, 255, 0.2);
+          transition: var(--enclave-transition);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .summary-item::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent 0%, var(--enclave-primary-dim) 50%, transparent 100%);
+          opacity: 0;
+          transition: var(--enclave-transition);
+        }
+
+        .summary-item:hover {
+          border-color: var(--enclave-primary);
+          box-shadow: var(--enclave-shadow-glow);
+          transform: translateY(-2px);
+        }
+
+        .summary-item:hover::before {
+          opacity: 1;
+        }
+
+        .summary-icon {
+          width: 56px;
+          height: 56px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--enclave-bg-secondary);
+          border: 2px solid var(--enclave-primary);
+          border-radius: 12px;
+          color: var(--enclave-primary);
+          position: relative;
+          z-index: 1;
+        }
+
+        .summary-content {
+          flex: 1;
+          position: relative;
+          z-index: 1;
         }
 
         .summary-label {
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--enclave-text-secondary);
           font-size: 14px;
           margin-bottom: 8px;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
+          font-family: var(--font-heading);
+          font-weight: 500;
         }
 
         .summary-value {
-          color: #00b4ff;
-          font-size: 24px;
+          color: var(--enclave-primary);
+          font-size: 28px;
           font-weight: 700;
+          font-family: var(--font-heading);
+          text-shadow: 0 0 15px var(--enclave-primary-glow);
         }
 
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
 
         @media (max-width: 768px) {
@@ -588,23 +995,42 @@ const Graphs: React.FC<GraphsProps> = ({ user }) => {
             grid-template-columns: 1fr;
           }
 
-          .time-range-selector {
+          .range-selector-content {
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
           }
 
-          .header-section h1 {
-            font-size: 28px;
+          .header-content h1 {
+            font-size: 36px;
           }
 
           .summary-grid {
             grid-template-columns: repeat(2, 1fr);
+          }
+
+          .summary-item {
+            gap: 16px;
+            padding: 20px;
+          }
+
+          .summary-icon {
+            width: 48px;
+            height: 48px;
+          }
+
+          .summary-value {
+            font-size: 24px;
           }
         }
 
         @media (max-width: 480px) {
           .summary-grid {
             grid-template-columns: 1fr;
+          }
+          
+          .selector-buttons {
+            flex-wrap: wrap;
+            justify-content: center;
           }
         }
       `}</style>
