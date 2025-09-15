@@ -1,0 +1,31 @@
+{
+  "name": "enclavefit",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Offline-first workout and meal planner with Enclave-inspired UI",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": ["pwa", "fitness", "offline", "enclave"],
+  "author": "EnclaveFit Team",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "dexie": "^4.2.0",
+    "framer-motion": "^12.23.12",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "recharts": "^3.2.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.4.0",
+    "vite-plugin-pwa": "^1.0.3",
+    "workbox-window": "^7.3.0"
+  }
+}

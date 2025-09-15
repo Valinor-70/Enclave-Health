@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    
+    <!-- Base application theme -->
+    <style name="Theme.EnclaveFit" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Enclave color scheme -->
+        <item name="colorPrimary">#00b4ff</item>
+        <item name="colorPrimaryVariant">#0099cc</item>
+        <item name="colorOnPrimary">#ffffff</item>
+        <item name="colorSecondary">#ff8a00</item>
+        <item name="colorSecondaryVariant">#e6780a</item>
+        <item name="colorOnSecondary">#ffffff</item>
+        <item name="android:colorBackground">#0b0f14</item>
+        <item name="colorSurface">#0f1720</item>
+        <item name="colorOnBackground">#ffffff</item>
+        <item name="colorOnSurface">#ffffff</item>
+        <item name="android:statusBarColor">#0b0f14</item>
+        <item name="android:navigationBarColor">#0b0f14</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <style name="Theme.EnclaveFit.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="Theme.EnclaveFit.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.EnclaveFit.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+</resources>
