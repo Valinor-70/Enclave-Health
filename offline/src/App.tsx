@@ -164,9 +164,9 @@ const App: React.FC = () => {
       <style>{`
         .app {
           min-height: 100vh;
-          background: #0b0f14;
-          color: #ffffff;
-          font-family: 'Inter', sans-serif;
+          background: var(--enclave-bg-primary);
+          color: var(--enclave-text-primary);
+          font-family: var(--font-body);
           position: relative;
           padding-bottom: 80px;
         }
@@ -185,43 +185,101 @@ const App: React.FC = () => {
           right: 0;
           background: rgba(15, 23, 32, 0.95);
           backdrop-filter: blur(20px);
-          border-top: 1px solid rgba(0, 180, 255, 0.2);
+          border-top: 2px solid var(--enclave-border);
           display: flex;
           justify-content: space-around;
-          padding: 10px 0;
+          padding: 12px 8px;
           z-index: 1000;
+          position: relative;
+        }
+
+        .bottom-nav::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(90deg, transparent 0%, rgba(0, 180, 255, 0.05) 50%, transparent 100%);
+          pointer-events: none;
+        }
+
+        .bottom-nav::after {
+          content: '';
+          position: absolute;
+          top: -2px;
+          left: 20px;
+          right: 20px;
+          height: 2px;
+          background: linear-gradient(90deg, transparent 0%, var(--enclave-primary) 50%, transparent 100%);
+          animation: navScan 3s ease-in-out infinite;
+        }
+
+        @keyframes navScan {
+          0%, 100% { opacity: 0.3; transform: scaleX(0.8); }
+          50% { opacity: 1; transform: scaleX(1); }
         }
 
         .nav-btn {
           background: none;
-          border: none;
-          color: rgba(255, 255, 255, 0.6);
+          border: 1px solid transparent;
+          color: var(--enclave-text-dim);
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 4px;
-          padding: 8px 12px;
+          gap: 6px;
+          padding: 10px 16px;
           border-radius: 8px;
-          transition: all 0.3s ease;
+          transition: var(--enclave-transition);
           cursor: pointer;
           font-size: 12px;
-          font-weight: 500;
+          font-weight: 600;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .nav-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent 0%, var(--enclave-primary-dim) 50%, transparent 100%);
+          border-radius: 8px;
+          opacity: 0;
+          transition: var(--enclave-transition);
         }
 
         .nav-btn:hover {
-          color: #00b4ff;
-          background: rgba(0, 180, 255, 0.1);
+          color: var(--enclave-primary);
+          border-color: var(--enclave-border);
+          transform: translateY(-2px);
+        }
+
+        .nav-btn:hover::before {
+          opacity: 1;
         }
 
         .nav-btn.active {
-          color: #00b4ff;
-          background: rgba(0, 180, 255, 0.15);
-          box-shadow: 0 0 20px rgba(0, 180, 255, 0.3);
+          color: var(--enclave-primary);
+          border-color: var(--enclave-primary);
+          background: var(--enclave-primary-dim);
+          box-shadow: var(--enclave-shadow-glow);
+          text-shadow: 0 0 8px var(--enclave-primary-glow);
+        }
+
+        .nav-btn.active::before {
+          opacity: 1;
         }
 
         .nav-btn svg {
           width: 24px;
           height: 24px;
+          filter: drop-shadow(0 0 4px currentColor);
         }
 
         @media (max-width: 768px) {
