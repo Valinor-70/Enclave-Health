@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { UserProfile, db, dbHelpers, WorkoutLog, WorkoutPlan, MealLog } from '../db/db';
 import { EvaluationModel } from '../logic/evaluation';
+import { EnclaveCard, EnclaveButton, EnclaveProgress, EnclaveToggle } from './EnclaveUI';
 
 interface DashboardProps {
   user: UserProfile;
@@ -86,166 +87,263 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   return (
     <div className="dashboard">
-      {/* Welcome Section */}
+      {/* Welcome Section with enhanced HUD styling */}
       <motion.div 
-        className="welcome-section"
+        className="mission-header"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1>Mission Control</h1>
-        <p>Your daily protocol status and objectives</p>
+        <div className="header-content">
+          <h1>Mission Control</h1>
+          <p>Your daily protocol status and objectives</p>
+          {/* Add Enclave flag icon */}
+          <div className="enclave-flag">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <path d="M4 6h24v20l-8-4-8 4V6z" stroke="currentColor" strokeWidth="2" fill="var(--enclave-primary)" opacity="0.3"/>
+              <circle cx="16" cy="12" r="3" fill="var(--enclave-primary)"/>
+            </svg>
+          </div>
+        </div>
       </motion.div>
 
-      {/* Quick Stats Grid */}
+      {/* Enhanced Stats Grid with HUD Cards */}
       <motion.div 
         className="stats-grid"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
       >
-        <div className="stat-card">
-          <div className="stat-icon">🎯</div>
-          <div className="stat-content">
-            <h3>Current Goal</h3>
-            <p>{user.fitnessAim.replace('_', ' ').toUpperCase()}</p>
+        <EnclaveCard variant="primary" glowing={true}>
+          <div className="hud-stat-card">
+            <div className="stat-icon target">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <circle cx="16" cy="16" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <circle cx="16" cy="16" r="2" fill="currentColor"/>
+              </svg>
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Current Goal</div>
+              <div className="stat-value">{user.fitnessAim.replace('_', ' ').toUpperCase()}</div>
+            </div>
           </div>
-        </div>
+        </EnclaveCard>
 
-        <div className="stat-card">
-          <div className="stat-icon">⚡</div>
-          <div className="stat-content">
-            <h3>Daily Calories</h3>
-            <p>{personalizedPlan.nutritionPlan.totalCalories}</p>
+        <EnclaveCard variant="primary" glowing={true}>
+          <div className="hud-stat-card">
+            <div className="stat-icon energy">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M13 2L3 14h6l-2 16 10-12h-6l4-16z"/>
+              </svg>
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Daily Calories</div>
+              <div className="stat-value">{personalizedPlan.nutritionPlan.totalCalories}</div>
+            </div>
           </div>
-        </div>
+        </EnclaveCard>
 
-        <div className="stat-card">
-          <div className="stat-icon">💪</div>
-          <div className="stat-content">
-            <h3>Training Days</h3>
-            <p>{personalizedPlan.workoutProgram.frequency}/week</p>
+        <EnclaveCard variant="primary" glowing={true}>
+          <div className="hud-stat-card">
+            <div className="stat-icon muscle">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M8 14c0-2 1-4 3-4s3 2 3 4v4c0 2 1 4 3 4s3-2 3-4v-4c0-2 1-4 3-4s3 2 3 4v10c0 3-2 5-5 5h-8c-3 0-5-2-5-5V14z"/>
+              </svg>
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Training Days</div>
+              <div className="stat-value">{personalizedPlan.workoutProgram.frequency}/week</div>
+            </div>
           </div>
-        </div>
+        </EnclaveCard>
 
-        <div className="stat-card">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <h3>Current Weight</h3>
-            <p>{user.weight} kg</p>
+        <EnclaveCard variant="primary" glowing={true}>
+          <div className="hud-stat-card">
+            <div className="stat-icon weight">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+                <rect x="6" y="12" width="20" height="8" rx="2"/>
+                <rect x="12" y="8" width="8" height="4" rx="1"/>
+                <rect x="14" y="20" width="4" height="4" rx="1"/>
+              </svg>
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Current Weight</div>
+              <div className="stat-value">{user.weight} kg</div>
+            </div>
           </div>
-        </div>
+        </EnclaveCard>
       </motion.div>
 
-      {/* Today's Workout Section */}
+      {/* Today's Mission with enhanced styling */}
       <motion.div 
-        className="section-card"
+        className="mission-section"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <div className="section-header">
-          <h2>Today's Mission</h2>
-          <div className={`status-indicator ${hasCompletedWorkout ? 'completed' : 'pending'}`}>
-            {hasCompletedWorkout ? 'COMPLETED' : 'PENDING'}
-          </div>
-        </div>
-
-        {hasCompletedWorkout ? (
-          <div className="completed-workout">
-            <div className="completion-icon">✅</div>
-            <div className="completion-text">
-              <h3>Mission Accomplished</h3>
-              <p>Today's workout has been completed. Great work!</p>
-            </div>
-          </div>
-        ) : (
-          <div className="workout-preview">
-            <h3>{personalizedPlan.workoutProgram.name}</h3>
-            <div className="exercise-list">
-              {personalizedPlan.workoutProgram.workouts[0]?.exercises.slice(0, 4).map((exercise, index) => (
-                <div key={index} className="exercise-item">
-                  <span className="exercise-name">{exercise.name}</span>
-                  <span className="exercise-details">{exercise.sets} × {exercise.reps}</span>
-                </div>
-              ))}
-              {personalizedPlan.workoutProgram.workouts[0]?.exercises.length > 4 && (
-                <div className="exercise-item more">
-                  <span>+{personalizedPlan.workoutProgram.workouts[0].exercises.length - 4} more exercises</span>
-                </div>
+        <EnclaveCard variant="primary" glowing={!hasCompletedWorkout}>
+          <div className="mission-header-card">
+            <h2>Today's Mission</h2>
+            <div className={`mission-status ${hasCompletedWorkout ? 'completed' : 'pending'}`}>
+              {hasCompletedWorkout ? (
+                <>
+                  <span className="status-dot completed"></span>
+                  COMPLETED
+                </>
+              ) : (
+                <>
+                  <span className="status-dot pending"></span>
+                  PENDING
+                </>
               )}
             </div>
-            
-            <button className="complete-btn" onClick={markWorkoutComplete}>
-              <span>Mark as Complete</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-              </svg>
-            </button>
           </div>
-        )}
+
+          {hasCompletedWorkout ? (
+            <div className="mission-completed">
+              <div className="completion-badge">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor">
+                  <circle cx="24" cy="24" r="20" fill="var(--enclave-text-success)" opacity="0.2"/>
+                  <path d="M20 24l4 4 8-8" stroke="var(--enclave-text-success)" strokeWidth="3" fill="none"/>
+                </svg>
+              </div>
+              <div className="completion-content">
+                <h3>Mission Accomplished</h3>
+                <p>Today's training protocol has been executed successfully. Outstanding work, soldier!</p>
+              </div>
+            </div>
+          ) : (
+            <div className="mission-active">
+              <h3 className="program-name">{personalizedPlan.workoutProgram.name}</h3>
+              <div className="exercise-protocol">
+                {personalizedPlan.workoutProgram.workouts[0]?.exercises.slice(0, 4).map((exercise, index) => (
+                  <motion.div 
+                    key={index} 
+                    className="exercise-entry"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div className="exercise-pip">
+                      <span className="pip-indicator"></span>
+                    </div>
+                    <span className="exercise-name">{exercise.name}</span>
+                    <span className="exercise-specs">{exercise.sets} × {exercise.reps}</span>
+                  </motion.div>
+                ))}
+                {personalizedPlan.workoutProgram.workouts[0]?.exercises.length > 4 && (
+                  <div className="exercise-entry more">
+                    <div className="exercise-pip">
+                      <span className="pip-indicator dim"></span>
+                    </div>
+                    <span className="exercise-more">+{personalizedPlan.workoutProgram.workouts[0].exercises.length - 4} more exercises</span>
+                  </div>
+                )}
+              </div>
+              
+              <EnclaveButton 
+                variant="success" 
+                plasma={true}
+                onClick={markWorkoutComplete}
+                className="mission-complete-btn"
+              >
+                Mark Mission Complete
+              </EnclaveButton>
+            </div>
+          )}
+        </EnclaveCard>
       </motion.div>
 
-      {/* Nutrition Section */}
+      {/* Nutrition Protocol with macro progress bars */}
       <motion.div 
-        className="section-card"
+        className="nutrition-section"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
       >
-        <div className="section-header">
-          <h2>Nutrition Protocol</h2>
-          <div className="status-indicator pending">TARGET</div>
-        </div>
+        <EnclaveCard variant="primary" glowing={true}>
+          <div className="mission-header-card">
+            <h2>Nutrition Protocol</h2>
+            <div className="mission-status target">
+              <span className="status-dot target"></span>
+              TARGET
+            </div>
+          </div>
 
-        <div className="nutrition-targets">
-          <div className="macro-item">
-            <div className="macro-label">Protein</div>
-            <div className="macro-value">{personalizedPlan.nutritionPlan.protein}g</div>
-            <div className="macro-percent">{personalizedPlan.nutritionPlan.proteinPercent}%</div>
+          <div className="macro-grid">
+            <div className="macro-container">
+              <EnclaveProgress
+                value={0}
+                max={personalizedPlan.nutritionPlan.protein}
+                label="Protein"
+                variant="primary"
+                glowWhenComplete={true}
+              />
+              <div className="macro-stats">
+                <span className="macro-target">{personalizedPlan.nutritionPlan.protein}g</span>
+                <span className="macro-percent">({personalizedPlan.nutritionPlan.proteinPercent}%)</span>
+              </div>
+            </div>
+            
+            <div className="macro-container">
+              <EnclaveProgress
+                value={0}
+                max={personalizedPlan.nutritionPlan.carbs}
+                label="Carbohydrates"
+                variant="warning"
+                glowWhenComplete={true}
+              />
+              <div className="macro-stats">
+                <span className="macro-target">{personalizedPlan.nutritionPlan.carbs}g</span>
+                <span className="macro-percent">({personalizedPlan.nutritionPlan.carbsPercent}%)</span>
+              </div>
+            </div>
+            
+            <div className="macro-container">
+              <EnclaveProgress
+                value={0}
+                max={personalizedPlan.nutritionPlan.fat}
+                label="Fat"
+                variant="success"
+                glowWhenComplete={true}
+              />
+              <div className="macro-stats">
+                <span className="macro-target">{personalizedPlan.nutritionPlan.fat}g</span>
+                <span className="macro-percent">({personalizedPlan.nutritionPlan.fatPercent}%)</span>
+              </div>
+            </div>
           </div>
-          
-          <div className="macro-item">
-            <div className="macro-label">Carbs</div>
-            <div className="macro-value">{personalizedPlan.nutritionPlan.carbs}g</div>
-            <div className="macro-percent">{personalizedPlan.nutritionPlan.carbsPercent}%</div>
-          </div>
-          
-          <div className="macro-item">
-            <div className="macro-label">Fat</div>
-            <div className="macro-value">{personalizedPlan.nutritionPlan.fat}g</div>
-            <div className="macro-percent">{personalizedPlan.nutritionPlan.fatPercent}%</div>
-          </div>
-        </div>
+        </EnclaveCard>
       </motion.div>
 
-      {/* Quick Actions */}
+      {/* Enhanced Quick Actions */}
       <motion.div 
-        className="quick-actions"
+        className="action-grid"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
       >
-        <button className="action-btn">
+        <EnclaveButton variant="secondary" size="lg" plasma={true}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
           Log Workout
-        </button>
+        </EnclaveButton>
         
-        <button className="action-btn">
+        <EnclaveButton variant="secondary" size="lg" plasma={true}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 5z"/>
           </svg>
           Log Meal
-        </button>
+        </EnclaveButton>
         
-        <button className="action-btn">
+        <EnclaveButton variant="secondary" size="lg" plasma={true}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
             <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
           </svg>
           View Progress
-        </button>
+        </EnclaveButton>
       </motion.div>
 
       <style>{`
@@ -261,278 +359,425 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           align-items: center;
           justify-content: center;
           min-height: 400px;
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--enclave-text-secondary);
         }
 
         .loading-spinner {
           width: 40px;
           height: 40px;
-          border: 3px solid rgba(0, 180, 255, 0.3);
-          border-top: 3px solid #00b4ff;
+          border: 3px solid var(--enclave-border);
+          border-top: 3px solid var(--enclave-primary);
           border-radius: 50%;
           animation: spin 1s linear infinite;
           margin-bottom: 16px;
+          box-shadow: var(--enclave-shadow-glow);
         }
 
-        .welcome-section {
+        /* Mission Header with Enclave styling */
+        .mission-header {
           text-align: center;
-          margin-bottom: 32px;
+          margin-bottom: 40px;
+          position: relative;
         }
 
-        .welcome-section h1 {
-          font-family: 'Orbitron', monospace;
-          font-size: 36px;
-          color: #00b4ff;
-          margin: 0 0 8px 0;
-          text-shadow: 0 0 20px rgba(0, 180, 255, 0.5);
+        .header-content {
+          position: relative;
+          padding: 32px;
+          background: var(--enclave-bg-secondary);
+          border: 2px solid var(--enclave-border);
+          border-radius: 16px;
+          overflow: hidden;
         }
 
-        .welcome-section p {
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 16px;
+        .header-content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent 0%, var(--enclave-primary-dim) 50%, transparent 100%);
+          pointer-events: none;
+        }
+
+        .header-content h1 {
+          font-family: var(--font-display);
+          font-size: 42px;
+          color: var(--enclave-primary);
+          margin: 0 0 12px 0;
+          text-shadow: 0 0 30px var(--enclave-primary-glow);
+          text-transform: uppercase;
+          letter-spacing: 3px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .header-content p {
+          color: var(--enclave-text-secondary);
+          font-size: 18px;
           margin: 0;
+          font-family: var(--font-body);
+          position: relative;
+          z-index: 1;
         }
 
+        .enclave-flag {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          color: var(--enclave-primary);
+          opacity: 0.6;
+          z-index: 1;
+        }
+
+        /* Enhanced Stats Grid */
         .stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 20px;
-          margin-bottom: 32px;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 24px;
+          margin-bottom: 40px;
         }
 
-        .stat-card {
-          background: rgba(15, 23, 32, 0.8);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 12px;
-          padding: 20px;
+        .hud-stat-card {
           display: flex;
           align-items: center;
-          gap: 16px;
-          backdrop-filter: blur(10px);
-          transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-          border-color: #00b4ff;
-          box-shadow: 0 0 20px rgba(0, 180, 255, 0.2);
-          transform: translateY(-2px);
+          gap: 20px;
+          padding: 8px;
         }
 
         .stat-icon {
-          font-size: 32px;
-          width: 60px;
-          height: 60px;
+          width: 64px;
+          height: 64px;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(0, 180, 255, 0.1);
+          background: var(--enclave-bg-tertiary);
+          border: 2px solid var(--enclave-primary);
           border-radius: 12px;
-          border: 1px solid rgba(0, 180, 255, 0.3);
+          color: var(--enclave-primary);
+          position: relative;
+          overflow: hidden;
         }
 
-        .stat-content h3 {
-          color: rgba(255, 255, 255, 0.8);
+        .stat-icon::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(45deg, transparent 30%, var(--enclave-primary-dim) 50%, transparent 70%);
+          animation: sweep 3s linear infinite;
+        }
+
+        @keyframes sweep {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+
+        .stat-content {
+          flex: 1;
+        }
+
+        .stat-label {
+          color: var(--enclave-text-secondary);
           font-size: 14px;
-          margin: 0 0 4px 0;
+          margin-bottom: 6px;
           font-weight: 500;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
+          font-family: var(--font-heading);
         }
 
-        .stat-content p {
-          color: #ffffff;
-          font-size: 20px;
+        .stat-value {
+          color: var(--enclave-text-primary);
+          font-size: 24px;
           font-weight: 700;
           margin: 0;
+          font-family: var(--font-heading);
+          text-shadow: 0 0 10px var(--enclave-primary-glow);
         }
 
-        .section-card {
-          background: rgba(15, 23, 32, 0.8);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 16px;
-          padding: 24px;
-          margin-bottom: 24px;
-          backdrop-filter: blur(10px);
+        /* Mission Section */
+        .mission-section,
+        .nutrition-section {
+          margin-bottom: 32px;
         }
 
-        .section-header {
+        .mission-header-card {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid var(--enclave-border);
         }
 
-        .section-header h2 {
-          font-family: 'Orbitron', monospace;
-          color: #00b4ff;
-          font-size: 24px;
+        .mission-header-card h2 {
+          font-family: var(--font-display);
+          color: var(--enclave-primary);
+          font-size: 28px;
           margin: 0;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-shadow: 0 0 15px var(--enclave-primary-glow);
         }
 
-        .status-indicator {
-          padding: 6px 12px;
-          border-radius: 6px;
+        .mission-status {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: 8px;
           font-size: 12px;
           font-weight: 700;
           letter-spacing: 1px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
         }
 
-        .status-indicator.completed {
-          background: rgba(34, 197, 94, 0.2);
-          color: #22c55e;
-          border: 1px solid #22c55e;
+        .mission-status.completed {
+          background: rgba(0, 255, 136, 0.2);
+          color: var(--enclave-text-success);
+          border: 1px solid var(--enclave-text-success);
+          box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
         }
 
-        .status-indicator.pending {
-          background: rgba(255, 138, 0, 0.2);
-          color: #ff8a00;
-          border: 1px solid #ff8a00;
+        .mission-status.pending {
+          background: var(--enclave-accent-glow);
+          color: var(--enclave-accent);
+          border: 1px solid var(--enclave-accent);
+          box-shadow: 0 0 15px var(--enclave-accent-glow);
         }
 
-        .completed-workout {
+        .mission-status.target {
+          background: var(--enclave-primary-glow);
+          color: var(--enclave-primary);
+          border: 1px solid var(--enclave-primary);
+          box-shadow: var(--enclave-shadow-glow);
+        }
+
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.completed {
+          background: var(--enclave-text-success);
+        }
+
+        .status-dot.pending {
+          background: var(--enclave-accent);
+        }
+
+        .status-dot.target {
+          background: var(--enclave-primary);
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        /* Mission Completed */
+        .mission-completed {
           display: flex;
           align-items: center;
-          gap: 20px;
-          padding: 24px;
-          background: rgba(34, 197, 94, 0.1);
-          border: 1px solid #22c55e;
-          border-radius: 12px;
+          gap: 24px;
+          padding: 32px;
+          background: rgba(0, 255, 136, 0.1);
+          border: 2px solid var(--enclave-text-success);
+          border-radius: 16px;
+          position: relative;
+          overflow: hidden;
         }
 
-        .completion-icon {
-          font-size: 48px;
+        .mission-completed::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent 0%, rgba(0, 255, 136, 0.05) 50%, transparent 100%);
         }
 
-        .completion-text h3 {
-          color: #22c55e;
+        .completion-badge {
+          position: relative;
+          z-index: 1;
+        }
+
+        .completion-content {
+          position: relative;
+          z-index: 1;
+        }
+
+        .completion-content h3 {
+          color: var(--enclave-text-success);
           margin: 0 0 8px 0;
-          font-size: 20px;
+          font-size: 24px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
-        .completion-text p {
-          color: rgba(255, 255, 255, 0.8);
+        .completion-content p {
+          color: var(--enclave-text-secondary);
           margin: 0;
+          line-height: 1.5;
         }
 
-        .workout-preview h3 {
-          color: #ffffff;
-          margin: 0 0 16px 0;
-          font-size: 18px;
+        /* Mission Active */
+        .mission-active {
+          position: relative;
         }
 
-        .exercise-list {
-          margin-bottom: 20px;
+        .program-name {
+          color: var(--enclave-text-primary);
+          margin: 0 0 20px 0;
+          font-size: 20px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
-        .exercise-item {
+        .exercise-protocol {
+          margin-bottom: 24px;
+        }
+
+        .exercise-entry {
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          padding: 12px 0;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          gap: 16px;
+          padding: 16px 0;
+          border-bottom: 1px solid var(--enclave-border);
+          transition: var(--enclave-transition);
         }
 
-        .exercise-item:last-child {
+        .exercise-entry:hover {
+          background: var(--enclave-primary-dim);
+        }
+
+        .exercise-entry:last-child {
           border-bottom: none;
         }
 
-        .exercise-item.more {
-          color: rgba(255, 255, 255, 0.6);
-          font-style: italic;
+        .exercise-pip {
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .pip-indicator {
+          width: 12px;
+          height: 12px;
+          border: 2px solid var(--enclave-primary);
+          border-radius: 50%;
+          background: var(--enclave-bg-tertiary);
+          position: relative;
+        }
+
+        .pip-indicator::after {
+          content: '';
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          width: 4px;
+          height: 4px;
+          background: var(--enclave-primary);
+          border-radius: 50%;
+          animation: pip-glow 2s ease-in-out infinite;
+        }
+
+        .pip-indicator.dim {
+          border-color: var(--enclave-text-dim);
+          opacity: 0.5;
+        }
+
+        .pip-indicator.dim::after {
+          background: var(--enclave-text-dim);
+          animation: none;
+        }
+
+        @keyframes pip-glow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
         }
 
         .exercise-name {
-          color: #ffffff;
+          color: var(--enclave-text-primary);
           font-weight: 500;
+          flex: 1;
+          font-family: var(--font-body);
         }
 
-        .exercise-details {
-          color: rgba(255, 255, 255, 0.7);
+        .exercise-specs {
+          color: var(--enclave-text-secondary);
           font-size: 14px;
-        }
-
-        .complete-btn {
-          background: linear-gradient(135deg, #00b4ff, #0099cc);
-          color: #ffffff;
-          border: none;
-          border-radius: 8px;
-          padding: 12px 20px;
+          font-family: var(--font-heading);
           font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          transition: all 0.3s ease;
+        }
+
+        .exercise-entry.more .exercise-more {
+          color: var(--enclave-text-dim);
+          font-style: italic;
+          flex: 1;
+        }
+
+        .mission-complete-btn {
           width: 100%;
-          justify-content: center;
+          margin-top: 8px;
         }
 
-        .complete-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 20px rgba(0, 180, 255, 0.4);
-        }
-
-        .nutrition-targets {
+        /* Macro Grid */
+        .macro-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 24px;
         }
 
-        .macro-item {
-          text-align: center;
+        .macro-container {
           padding: 20px;
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--enclave-bg-tertiary);
+          border: 1px solid var(--enclave-border);
           border-radius: 12px;
-          border: 1px solid rgba(0, 180, 255, 0.2);
+          transition: var(--enclave-transition);
         }
 
-        .macro-label {
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 14px;
-          margin-bottom: 8px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+        .macro-container:hover {
+          border-color: var(--enclave-primary);
+          box-shadow: var(--enclave-shadow-glow);
         }
 
-        .macro-value {
-          color: #ffffff;
-          font-size: 24px;
-          font-weight: 700;
-          margin-bottom: 4px;
+        .macro-stats {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 12px;
+        }
+
+        .macro-target {
+          color: var(--enclave-text-primary);
+          font-family: var(--font-heading);
+          font-weight: 600;
+          font-size: 18px;
         }
 
         .macro-percent {
-          color: #00b4ff;
-          font-size: 12px;
-          font-weight: 600;
+          color: var(--enclave-text-secondary);
+          font-size: 14px;
+          font-family: var(--font-body);
         }
 
-        .quick-actions {
+        /* Action Grid */
+        .action-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 16px;
-        }
-
-        .action-btn {
-          background: rgba(255, 255, 255, 0.05);
-          color: #ffffff;
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 12px;
-          padding: 16px 20px;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          transition: all 0.3s ease;
-        }
-
-        .action-btn:hover {
-          border-color: #00b4ff;
-          background: rgba(0, 180, 255, 0.1);
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(0, 180, 255, 0.2);
+          gap: 20px;
         }
 
         @keyframes spin {
@@ -546,32 +791,46 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           }
 
           .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-          }
-
-          .nutrition-targets {
             grid-template-columns: 1fr;
             gap: 16px;
           }
 
-          .quick-actions {
+          .macro-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+
+          .action-grid {
             grid-template-columns: 1fr;
           }
 
-          .welcome-section h1 {
-            font-size: 28px;
+          .header-content h1 {
+            font-size: 32px;
           }
 
-          .section-header {
+          .mission-header-card {
             flex-direction: column;
             align-items: flex-start;
             gap: 12px;
           }
 
-          .completed-workout {
+          .mission-completed {
             flex-direction: column;
             text-align: center;
+          }
+
+          .hud-stat-card {
+            gap: 16px;
+          }
+
+          .stat-icon {
+            width: 56px;
+            height: 56px;
+          }
+
+          .enclave-flag {
+            position: static;
+            margin-top: 16px;
           }
         }
       `}</style>

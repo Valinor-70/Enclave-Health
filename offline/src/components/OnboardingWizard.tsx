@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, UserProfile } from '../db/db';
 import { EvaluationModel } from '../logic/evaluation';
+import { EnclaveCard, EnclaveButton } from './EnclaveUI';
 
 interface OnboardingWizardProps {
   onComplete: (profile: UserProfile) => void;
@@ -108,7 +109,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
               <label>Gender</label>
               <div className="radio-group">
                 {(['male', 'female', 'other'] as const).map(option => (
-                  <label key={option} className="radio-label">
+                  <label key={option} className={`radio-label ${formData.gender === option ? 'checked' : ''}`}>
                     <input
                       type="radio"
                       name="gender"
@@ -331,59 +332,83 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
   return (
     <div className="onboarding-container">
       <div className="onboarding-content">
-        {/* Progress indicator */}
+        {/* Progress indicator with segmented HUD style */}
         <div className="progress-section">
-          <div className="progress-bar">
-            <motion.div 
-              className="progress-fill"
-              initial={{ width: '0%' }}
-              animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-          <div className="step-indicator">
-            Step {currentStep + 1} of {steps.length}: {steps[currentStep]}
+          <div className="hud-progress-container">
+            <div className="progress-segments">
+              {steps.map((step, index) => (
+                <motion.div
+                  key={index}
+                  className={`progress-segment ${index <= currentStep ? 'active' : ''}`}
+                  initial={{ scale: 0.8, opacity: 0.3 }}
+                  animate={{ 
+                    scale: index === currentStep ? 1.1 : 1, 
+                    opacity: index <= currentStep ? 1 : 0.3 
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="segment-inner" />
+                  {index <= currentStep && (
+                    <motion.div
+                      className="segment-glow"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+                </motion.div>
+              ))}
+            </div>
+            <div className="step-indicator">
+              <span className="step-label">Mission Step</span>
+              <span className="step-number">{currentStep + 1}/{steps.length}</span>
+              <span className="step-name">{steps[currentStep]}</span>
+            </div>
           </div>
         </div>
 
         {/* Step content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="step-container"
-          >
-            {renderStep()}
-          </motion.div>
-        </AnimatePresence>
+        <EnclaveCard glowing={true} className="step-card">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="step-container"
+            >
+              {renderStep()}
+            </motion.div>
+          </AnimatePresence>
+        </EnclaveCard>
 
         {/* Navigation */}
         <div className="navigation">
           {currentStep > 0 && (
-            <button className="btn btn-secondary" onClick={prevStep}>
+            <EnclaveButton variant="secondary" onClick={prevStep}>
               Previous
-            </button>
+            </EnclaveButton>
           )}
           
           {currentStep < steps.length - 1 ? (
-            <button 
-              className="btn btn-primary" 
+            <EnclaveButton 
+              variant="primary"
+              plasma={true}
               onClick={nextStep}
               disabled={!canProceed()}
             >
               Next
-            </button>
+            </EnclaveButton>
           ) : (
-            <button 
-              className="btn btn-primary" 
+            <EnclaveButton 
+              variant="success"
+              plasma={true}
               onClick={handleSubmit}
               disabled={!canProceed()}
             >
               Initialize Protocol
-            </button>
+            </EnclaveButton>
           )}
         </div>
       </div>
@@ -391,67 +416,154 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
       <style>{`
         .onboarding-container {
           min-height: 100vh;
-          background: linear-gradient(135deg, #0b0f14 0%, #0f1720 100%);
+          background: var(--enclave-bg-primary);
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 20px;
+          position: relative;
+        }
+
+        .onboarding-container::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: 
+            radial-gradient(circle at 20% 80%, rgba(0, 180, 255, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 138, 0, 0.15) 0%, transparent 50%);
+          pointer-events: none;
         }
 
         .onboarding-content {
-          background: rgba(15, 23, 32, 0.8);
-          border: 1px solid rgba(0, 180, 255, 0.3);
-          border-radius: 16px;
-          padding: 40px;
-          max-width: 600px;
+          max-width: 700px;
           width: 100%;
-          backdrop-filter: blur(20px);
-          box-shadow: 0 0 40px rgba(0, 180, 255, 0.1);
+          position: relative;
+          z-index: 1;
         }
 
         .progress-section {
           margin-bottom: 40px;
         }
 
-        .progress-bar {
-          width: 100%;
-          height: 4px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 2px;
+        .hud-progress-container {
+          background: var(--enclave-bg-secondary);
+          border: 1px solid var(--enclave-border);
+          border-radius: 12px;
+          padding: 24px;
+          position: relative;
           overflow: hidden;
-          margin-bottom: 12px;
         }
 
-        .progress-fill {
+        .hud-progress-container::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent 0%, rgba(0, 180, 255, 0.05) 50%, transparent 100%);
+          pointer-events: none;
+        }
+
+        .progress-segments {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 16px;
+          position: relative;
+        }
+
+        .progress-segment {
+          flex: 1;
+          height: 8px;
+          position: relative;
+          border-radius: 4px;
+          overflow: hidden;
+        }
+
+        .segment-inner {
+          width: 100%;
           height: 100%;
-          background: linear-gradient(90deg, #00b4ff, #ff8a00);
-          border-radius: 2px;
-          box-shadow: 0 0 10px rgba(0, 180, 255, 0.5);
+          background: var(--enclave-bg-tertiary);
+          border: 1px solid var(--enclave-border);
+          border-radius: 4px;
+          transition: var(--enclave-transition);
+        }
+
+        .progress-segment.active .segment-inner {
+          background: linear-gradient(90deg, var(--enclave-primary), rgba(0, 180, 255, 0.8));
+          border-color: var(--enclave-primary);
+          box-shadow: inset 0 0 10px rgba(0, 180, 255, 0.5);
+        }
+
+        .segment-glow {
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          right: -2px;
+          bottom: -2px;
+          background: var(--enclave-primary);
+          border-radius: 6px;
+          filter: blur(4px);
+          z-index: -1;
         }
 
         .step-indicator {
-          color: rgba(255, 255, 255, 0.8);
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-family: var(--font-heading);
+        }
+
+        .step-label {
+          color: var(--enclave-text-secondary);
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .step-number {
+          color: var(--enclave-primary);
+          font-size: 18px;
+          font-weight: 700;
+          text-shadow: 0 0 10px var(--enclave-primary-glow);
+        }
+
+        .step-name {
+          color: var(--enclave-text-primary);
           font-size: 14px;
           font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .step-card {
+          margin-bottom: 32px;
         }
 
         .step-container {
-          min-height: 300px;
-          margin-bottom: 40px;
+          min-height: 320px;
         }
 
         .step-content h2 {
-          font-family: 'Orbitron', monospace;
-          color: #00b4ff;
-          font-size: 28px;
-          margin-bottom: 8px;
+          font-family: var(--font-display);
+          color: var(--enclave-primary);
+          font-size: 32px;
+          margin-bottom: 12px;
           text-align: center;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-shadow: 0 0 20px var(--enclave-primary-glow);
         }
 
         .step-content > p {
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--enclave-text-secondary);
           text-align: center;
           margin-bottom: 32px;
+          font-size: 16px;
+          font-family: var(--font-body);
         }
 
         .form-group {
@@ -466,40 +578,57 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
 
         .form-group label {
           display: block;
-          color: #ffffff;
+          color: var(--enclave-text-primary);
           font-weight: 600;
           margin-bottom: 8px;
           font-size: 14px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .form-input {
           width: 100%;
-          padding: 12px 16px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 2px solid rgba(0, 180, 255, 0.3);
+          padding: 14px 18px;
+          background: rgba(15, 23, 32, 0.8);
+          border: 2px solid var(--enclave-border);
           border-radius: 8px;
-          color: #ffffff;
+          color: var(--enclave-text-primary);
           font-size: 16px;
-          transition: all 0.3s ease;
+          font-family: var(--font-body);
+          transition: var(--enclave-transition);
+          position: relative;
         }
 
         .form-input:focus {
           outline: none;
-          border-color: #00b4ff;
-          box-shadow: 0 0 15px rgba(0, 180, 255, 0.3);
+          border-color: var(--enclave-primary);
+          box-shadow: 0 0 15px var(--enclave-primary-glow);
+          background: rgba(15, 23, 32, 0.9);
         }
 
         .radio-group {
           display: flex;
           gap: 20px;
+          flex-wrap: wrap;
         }
 
         .radio-label {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 12px;
           cursor: pointer;
           font-weight: 500;
+          padding: 12px 16px;
+          border: 2px solid var(--enclave-border);
+          border-radius: 8px;
+          transition: var(--enclave-transition);
+          background: rgba(15, 23, 32, 0.5);
+        }
+
+        .radio-label:hover {
+          border-color: var(--enclave-primary);
+          background: var(--enclave-primary-dim);
         }
 
         .radio-label input[type="radio"] {
@@ -509,26 +638,34 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         .radio-custom {
           width: 20px;
           height: 20px;
-          border: 2px solid rgba(0, 180, 255, 0.5);
+          border: 2px solid var(--enclave-border-glow);
           border-radius: 50%;
           position: relative;
-          transition: all 0.3s ease;
+          transition: var(--enclave-transition);
+          background: var(--enclave-bg-tertiary);
+        }
+
+        .radio-label.checked {
+          border-color: var(--enclave-primary);
+          background: var(--enclave-primary-dim);
+          box-shadow: var(--enclave-shadow-glow);
         }
 
         .radio-label input[type="radio"]:checked + .radio-custom {
-          border-color: #00b4ff;
-          background: #00b4ff;
+          border-color: var(--enclave-primary);
+          background: var(--enclave-primary);
+          box-shadow: 0 0 15px var(--enclave-primary-glow);
         }
 
         .radio-label input[type="radio"]:checked + .radio-custom::after {
           content: '';
           position: absolute;
-          top: 3px;
-          left: 3px;
-          width: 10px;
-          height: 10px;
+          top: 4px;
+          left: 4px;
+          width: 8px;
+          height: 8px;
           border-radius: 50%;
-          background: #ffffff;
+          background: var(--enclave-bg-primary);
         }
 
         .goal-options {
@@ -537,61 +674,119 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
         }
 
         .goal-option {
-          padding: 20px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 2px solid rgba(0, 180, 255, 0.3);
+          padding: 24px;
+          background: rgba(15, 23, 32, 0.6);
+          border: 2px solid var(--enclave-border);
           border-radius: 12px;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: var(--enclave-transition);
           text-align: left;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .goal-option::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent 0%, rgba(0, 180, 255, 0.05) 50%, transparent 100%);
+          opacity: 0;
+          transition: var(--enclave-transition);
         }
 
         .goal-option:hover {
-          border-color: #00b4ff;
-          background: rgba(0, 180, 255, 0.1);
+          border-color: var(--enclave-primary);
+          background: var(--enclave-primary-dim);
+          transform: translateY(-2px);
+        }
+
+        .goal-option:hover::before {
+          opacity: 1;
         }
 
         .goal-option.selected {
-          border-color: #00b4ff;
-          background: rgba(0, 180, 255, 0.15);
-          box-shadow: 0 0 20px rgba(0, 180, 255, 0.3);
+          border-color: var(--enclave-primary);
+          background: var(--enclave-primary-dim);
+          box-shadow: var(--enclave-shadow-glow);
+        }
+
+        .goal-option.selected::before {
+          opacity: 1;
         }
 
         .goal-option h3 {
-          color: #ffffff;
+          color: var(--enclave-text-primary);
           margin: 0 0 8px 0;
-          font-size: 18px;
+          font-size: 20px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
 
         .goal-option p {
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--enclave-text-secondary);
           margin: 0;
           font-size: 14px;
+          line-height: 1.5;
         }
 
         .review-card {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(0, 180, 255, 0.3);
+          background: rgba(15, 23, 32, 0.8);
+          border: 2px solid var(--enclave-border);
           border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 16px;
+          padding: 24px;
+          margin-bottom: 20px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .review-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, transparent 0%, rgba(0, 180, 255, 0.03) 50%, transparent 100%);
         }
 
         .review-card h3 {
-          color: #00b4ff;
+          color: var(--enclave-primary);
           margin: 0 0 16px 0;
           font-size: 18px;
+          font-family: var(--font-heading);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          position: relative;
+          z-index: 1;
         }
 
         .review-item {
           display: flex;
           justify-content: space-between;
-          padding: 8px 0;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          align-items: center;
+          padding: 12px 0;
+          border-bottom: 1px solid var(--enclave-border);
+          position: relative;
+          z-index: 1;
         }
 
         .review-item:last-child {
           border-bottom: none;
+        }
+
+        .review-item span:first-child {
+          color: var(--enclave-text-secondary);
+          font-family: var(--font-body);
+        }
+
+        .review-item span:last-child {
+          color: var(--enclave-primary);
+          font-family: var(--font-heading);
+          font-weight: 600;
         }
 
         .navigation {
@@ -600,65 +795,62 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
           gap: 16px;
         }
 
-        .btn {
-          padding: 12px 24px;
-          border: none;
-          border-radius: 8px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-size: 16px;
+        .navigation > * {
           flex: 1;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, #00b4ff, #0099cc);
-          color: #ffffff;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 20px rgba(0, 180, 255, 0.4);
-        }
-
-        .btn-primary:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .btn-secondary {
-          background: rgba(255, 255, 255, 0.1);
-          color: #ffffff;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.2);
         }
 
         .submitting-screen {
           text-align: center;
-          padding: 60px 40px;
+          padding: 80px 40px;
+          background: var(--enclave-bg-secondary);
+          border: 1px solid var(--enclave-border);
+          border-radius: 16px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .submitting-screen::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: 
+            radial-gradient(circle at center, rgba(0, 180, 255, 0.1) 0%, transparent 70%),
+            linear-gradient(45deg, transparent 30%, rgba(0, 180, 255, 0.02) 50%, transparent 70%);
         }
 
         .submitting-screen .loader {
-          width: 60px;
-          height: 60px;
-          border: 3px solid rgba(0, 180, 255, 0.3);
-          border-top: 3px solid #00b4ff;
+          width: 80px;
+          height: 80px;
+          border: 4px solid var(--enclave-border);
+          border-top: 4px solid var(--enclave-primary);
           border-radius: 50%;
           animation: spin 1s linear infinite;
-          margin: 0 auto 24px;
+          margin: 0 auto 32px;
+          box-shadow: var(--enclave-shadow-glow);
+          position: relative;
+          z-index: 1;
         }
 
         .submitting-screen h2 {
-          color: #00b4ff;
-          font-family: 'Orbitron', monospace;
-          margin-bottom: 12px;
+          color: var(--enclave-primary);
+          font-family: var(--font-display);
+          margin-bottom: 16px;
+          font-size: 28px;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          text-shadow: 0 0 20px var(--enclave-primary-glow);
+          position: relative;
+          z-index: 1;
         }
 
         .submitting-screen p {
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--enclave-text-secondary);
+          font-family: var(--font-body);
+          position: relative;
+          z-index: 1;
         }
 
         @keyframes spin {
@@ -668,7 +860,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
 
         @media (max-width: 768px) {
           .onboarding-content {
-            padding: 24px;
+            padding: 16px;
           }
           
           .form-row {
@@ -678,6 +870,20 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }) => {
           .radio-group {
             flex-direction: column;
             gap: 12px;
+          }
+
+          .step-content h2 {
+            font-size: 24px;
+          }
+
+          .hud-progress-container {
+            padding: 20px;
+          }
+
+          .step-indicator {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
           }
         }
       `}</style>
