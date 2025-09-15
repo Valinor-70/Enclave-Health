@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { UserProfile, db, dbHelpers, WorkoutLog, WorkoutPlan, MealLog } from '../db/db';
 import { EvaluationModel } from '../logic/evaluation';
-import { EnclaveCard, EnclaveButton, EnclaveProgress, EnclaveToggle } from './EnclaveUI';
+import { EnclaveCard, EnclaveButton, EnclaveProgress } from './EnclaveUI';
 
 interface DashboardProps {
   user: UserProfile;
